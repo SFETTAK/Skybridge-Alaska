@@ -15,13 +15,19 @@ SkyBridge has established direct relationships with the core technology provider
 - **Development roadmap alignment** for aviation use cases
 
 ### Rokland Technologies Partnership
-**Contact**: Jason Opdyke - Rokland Technologies  
+**Contact**: Jason Opdyke - [Rokland Technologies](https://rokland.com)  
 **Status**: Multiple technical calls, ongoing collaboration discussions  
 **Partnership Value**:
-- **Antenna and hardware optimization** for aviation environments
-- **Product development support** for ruggedized aviation installations
-- **Technical consultation** on RF performance and range optimization
-- **Supply chain partnership** for scaled deployment
+- **Integrated radio development** - Combining VHF, ADS-B, SDR, and LoRa in single unit
+- **Aviation-specific hardware** - Ruggedized installations for Alaska conditions
+- **All-in-one cockpit solution** - Single radio handles all communication needs
+- **Supply chain partnership** - Scaled deployment and technical support
+
+**Planned Integration:**
+- **VHF transceiver integration** - Eliminate need for separate aviation radios
+- **ADS-B receiver built-in** - Native traffic awareness without external devices
+- **SDR capabilities** - Software-defined radio for flexible frequency support
+- **Single antenna solution** - Simplified aircraft installation
 
 ## Technical Validation from Partnerships
 

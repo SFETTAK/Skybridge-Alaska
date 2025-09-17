@@ -1,7 +1,7 @@
 # SkyBridge Alaska - Elevator Pitch for NASAO 2025
 
-## 30-Second Version
-*"Alaska pilots are dying at 36 times the national rate because they can't get weather updates in remote areas. We're fixing this with $50 mesh radios that let pilots share critical safety data peer-to-peer. No satellites, no subscriptions, just pilots helping pilots. Alaska DOT is piloting it now."*
+## 30-Second Version - The Raw Syrup
+*"Every pilot has missed that ONE critical radio call. SkyBridge solves this forever - Alaska DOT base stations capture EVERY VHF transmission, convert to text, and share via $50 mesh radios. **All of this on your phone or tablet** - get all aviation data anywhere in the sky with NO subscriptions, NO tracking, NO corporate overlords. You control what you share, but get everything you need. The more pilots join, the safer it gets. Alaska is deploying it now."*
 
 ## 60-Second Version (With Washington Post Credibility)
 *"The Washington Post investigated Alaska's aviation crisis and found that Mars is literally better mapped than Alaska. Terrain mapping errors of 263+ feet are killing pilots - like Alex Stack and Aric Beane, who died when their GPS showed a ridge 263 feet lower than reality.*

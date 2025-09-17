@@ -1,25 +1,24 @@
 # SkyBridge Technical Whitepaper - Executive Summary
 *Revolutionizing Aviation Communication with Meshtastic*
 
-## The Complete Solution is Already Working
+## Working Prototypes with Full System in Development
 
-**This is not a concept - it's operational.** We have tested and deployed working Meshtastic devices forming an active peer-to-peer communication mesh with a functioning prototype aviation-specific mobile application.
+**This is not just a concept - we have working prototypes.** We have tested and deployed [Meshtastic](https://meshtastic.org) radios with pilots successfully exchanging text messages and status updates across the mesh network. The complete aviation data integration and mobile application are in active development.
 
-## System Capabilities (Currently Operational)
+## System Capabilities (Prototype + Planned)
 
-### ✅ **Real-Time Data Delivery**
-- **Digital NOTAMs** - Timely alerts broadcast over mesh
-- **Live Weather Feeds** - Regional updates pushed to in-flight devices  
-- **ADS-B Awareness** - Aircraft tracking displayed to network users
-- **Voice-to-Text Radio Transcription** - VHF/UHF transmissions transcribed and displayed
-- **Status & Emergency Messages** - Check-ins, updates, assistance requests
+### ✅ **Currently Working**
+- **[Meshtastic](https://meshtastic.org) mesh network** - Radios deployed and tested with pilots
+- **Text messaging** - Successful pilot-to-pilot communication via mesh
+- **Status updates** - Location and status sharing between aircraft
+- **Basic mobile interface** - Prototype app for radio configuration
 
-### ✅ **In-Flight Dashboard**
-Custom aviation app turning smartphones into real-time cockpit dashboard:
-- Weather and Alert Widgets
-- Transcribed Radio Message Log
-- Live Aircraft Map & Positioning  
-- Multi-Function Display (MFD) Layout
+### 🚧 **In Active Development**
+- **Digital NOTAMs** - State-curated alerts broadcast over mesh
+- **Live Weather Feeds** - Alaska DOT&PF weather pushed to aircraft
+- **ADS-B Integration** - Traffic awareness through mesh network
+- **VHF Transcription** - Base station voice-to-text conversion
+- **Full aviation dashboard** - Complete pilot interface and services
 
 ### ✅ **Strategic Infrastructure**
 - **Airport Installations** - Ground nodes at rural/regional airports
