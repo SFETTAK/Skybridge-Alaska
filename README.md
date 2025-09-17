@@ -18,22 +18,24 @@ A decentralized, community-operated mesh network providing critical aviation saf
 - **Government mapping solutions stuck in budget gridlock** - $30M needed just to finish Alaska *(Washington Post)*
 - **"Mars is better mapped than the state of Alaska"** - Steve Colligan, E-Terra Aviation Safety
 
-### The SkyBridge Solution
-SkyBridge creates a **$50 peer-to-peer mesh network** using LoRa radios and NASA's TAIGA ASN.1 protocol to deliver:
+### What is SkyBridge?
+SkyBridge is a **$50 radio system** that creates a peer-to-peer mesh network using [Meshtastic](https://meshtastic.org) technology. Think of it as "walkie-talkies for pilots" that automatically relay messages between aircraft and ground stations - **even when you're out of cell phone and satellite coverage**.
 
-🌤️ **Real-time weather updates** - Current conditions from pilots and ground stations  
-✈️ **PIREPs from other pilots** - Critical turbulence, icing, and visibility reports  
-📡 **NOTAMs and runway conditions** - Runway closures, hazards, and operational updates  
-🚨 **Emergency beacon relay** - Automated distress signal forwarding to rescue services  
-⛰️ **Terrain warnings** - Enhanced situational awareness in mountainous terrain  
+**Key capabilities:**
 
-**Key Innovation:** 80% data compression using NASA's TAIGA protocol enables critical safety information to flow over low-bandwidth LoRa networks.
+🌤️ **State-curated weather updates** - Alaska DOT&PF provides reliable, official weather data  
+✈️ **ADS-B traffic on your phone** - See nearby aircraft even without cellular or satellite  
+📡 **VHF radio transcription** - Base stations convert radio chatter to text and share across network  
+🚨 **Automatic crash detection** - iPhone-like fall detection publishes emergency location  
+⛰️ **Real-time pilot reports** - Turbulence, icing, and visibility from pilots ahead of you  
+
+**Why pilots want this:** Get critical safety information when cell towers and satellites can't reach you. **No monthly fees, no subscriptions** - just a one-time $50 radio purchase.
 
 ### Technology Stack
-- **Hardware**: RAK4631 (nRF52840) + RP2040 dual-processor boards
-- **Protocol**: TAIGA ASN.1 for efficient data compression
-- **Network**: Meshtastic-based LoRa mesh
-- **Interface**: React Native mobile app
+- **Hardware**: Affordable LoRa radios available from multiple vendors
+- **Protocol**: NASA TAIGA ASN.1 for efficient data compression  
+- **Network**: [Meshtastic](https://meshtastic.org) open-source mesh networking
+- **Interface**: Mobile app for iOS and Android
 
 ### Project Status
 ✅ **Operational System** - Working Meshtastic devices and aviation app deployed  
@@ -45,12 +47,46 @@ SkyBridge creates a **$50 peer-to-peer mesh network** using LoRa radios and NASA
 
 ![Network Topology](docs/network.jpg)
 
-**This is not a concept - it's working today.** We have functioning hardware, operational mesh networks, and a mobile app delivering real-time aviation data to pilots in Alaska.
+**This is not just a concept - we have working prototypes.** We have [Meshtastic](https://meshtastic.org) radios deployed and tested, with pilots successfully exchanging text messages and status updates across the mesh network. The full aviation data integration is in active development.
 
-### License
-Dual licensed:
-- AGPL-3.0 for open source use
-- Commercial licenses available
+### License Options
+
+**Dual licensing supports both public safety and commercial innovation:**
+
+#### **Free Use (AGPL-3.0)**
+- ✅ **State and federal agencies** (Alaska DOT&PF, FAA, NOAA, NWS)
+- ✅ **Search and rescue organizations** 
+- ✅ **Educational institutions**
+- ✅ **Small Part 135 operators** (fewer than 5 aircraft)
+- ✅ **501(c)(3) nonprofits** serving Alaska aviation
+
+#### **Commercial License Required**
+- Part 135 operators with 5+ aircraft
+- Part 121 air carriers  
+- Oil & gas, mining, tourism companies
+- Out-of-state commercial operators
+- Technology companies creating derivative products
+
+**Contact**: [commercial@skybridgealaska.net](mailto:commercial@skybridgealaska.net) for licensing inquiries
+
+See [LICENSE.md](LICENSE.md) for complete terms.
+
+### Primary Use Cases - Why Pilots Want This
+
+**🛩️ See Traffic Without Cell Service**  
+Your phone shows nearby aircraft using [Meshtastic](https://meshtastic.org) mesh network - even in remote areas where ADS-B ground stations don't reach.
+
+**📻 Hear Radio Traffic as Text**  
+Base stations transcribe VHF radio chatter and share it across the [Meshtastic](https://meshtastic.org) network, so you can "hear" what's happening even when you're out of VHF range.
+
+**🌤️ Get Reliable Weather**  
+Alaska DOT&PF curates official NOAA weather data and pushes it through the mesh - no more relying on outdated or commercial weather services.
+
+**🚨 Automatic Emergency Alerts**  
+iPhone-like crash detection automatically broadcasts your location and emergency status across the network if something goes wrong.
+
+**💰 No Monthly Fees**  
+One-time $50 radio purchase, no subscriptions, no satellite fees. The [Meshtastic](https://meshtastic.org) network is community-owned and operated.
 
 ### For State Aviation Officials
 
@@ -61,8 +97,14 @@ Dual licensed:
 - 📈 **Revenue potential** - Commercial licensing funds ongoing development while keeping core system open source
 - 🤝 **Interstate cooperation** - Shared development costs, shared safety benefits
 
+**Advanced Integration Capabilities:**
+- **CANBUS/OBD2/Aero-CAN integration** - Connect to aircraft systems for automated reporting
+- **VHF/ADS-B/SDR combination radios** - Partnership with [Rokland Technologies](https://rokland.com) for integrated solutions
+- **RWIS highway weather support** - Integration with road weather information systems
+- **Volcanic and seismic monitoring** - Support for UAF Volcanic Institute and USGS networks
+
 **Ready for Multi-State Pilot Program**
-- Technical specifications complete
+- Working [Meshtastic](https://meshtastic.org) prototypes deployed and tested
 - NASA TAIGA protocol integration proven
 - Alaska DOT&PF partnership established
 - Seeking 3-5 additional states for coordinated deployment
@@ -83,7 +125,8 @@ Dual licensed:
 - 🎯 **[NASAO Elevator Pitch](docs/elevator_pitch.md)** - Presentation materials for state officials
 
 ### Contact
-- **Technical**: Steven Fett, Alaska DOT&PF - [sfett@alaska.gov](mailto:sfett@alaska.gov)
+- **Technical Lead**: Steven Fett, Alaska DOT&PF - [steven.fett@alaska.gov](mailto:steven.fett@alaska.gov)
+- **Engineering**: Ryan Marlow, Alaska DOT&PF - [ryan.marlow@alaska.gov](mailto:ryan.marlow@alaska.gov)
 - **Project**: https://skybridgealaska.net
 - **Repository**: https://github.com/SFETTAK/Skybridge-Alaska
 

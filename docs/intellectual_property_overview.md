@@ -5,23 +5,15 @@
 
 SkyBridge's core technologies are protected by **three comprehensive provisional patent applications** filed with the USPTO, covering the fundamental innovations that make the system unique and commercially viable.
 
-### Patent Application A: LoRa-Based Mesh System for Relaying Transcribed VHF Air Traffic Messages
-**Innovation**: Automatic speech recognition of VHF radio traffic with mesh distribution
-- **Problem Solved**: VHF radio coverage gaps in remote areas
-- **Solution**: SDR-based voice-to-text conversion with LoRa mesh relay
-- **Commercial Value**: Enables pilots to receive transcribed radio traffic even when out of VHF range
+### Patent Protection Overview
 
-### Patent Application B: Hybrid ADS-B/LoRa Mesh Collision Alert System  
-**Innovation**: Fusion of ADS-B and mesh peer position data for synthetic traffic alerts
-- **Problem Solved**: Limited traffic awareness below radar coverage
-- **Solution**: Real-time collision prediction using Kalman filtering and CPA calculations
-- **Commercial Value**: Provides TIS-like situational awareness without expensive ground infrastructure
+SkyBridge's core technologies are protected by **three comprehensive provisional patent applications** filed with the USPTO under Alaska DOT&PF ownership. These patents cover fundamental innovations in:
 
-### Patent Application C: Autonomous Multi-Node Direction Finding & Triangulation of Emergency Beacons
-**Innovation**: Distributed emergency beacon triangulation using KrakenSDR arrays
-- **Problem Solved**: Delayed SAR response due to imprecise ELT locations
-- **Solution**: Sub-$1K DF nodes providing 350m CEP accuracy at 40km range
-- **Commercial Value**: Revolutionary improvement over $100K+ traditional DF systems
+- **Mesh-based aviation communication systems**
+- **Hybrid traffic awareness and collision avoidance**  
+- **Distributed emergency beacon triangulation**
+
+The patent portfolio provides competitive protection while enabling the dual licensing model that keeps the core system open source for public safety while allowing commercial partnerships for expanded capabilities.
 
 ## Strategic Patent Portfolio Advantages
 

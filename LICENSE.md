@@ -1,6 +1,6 @@
 # SkyBridge Alaska Commercial License Agreement
 
-Copyright (C) 2024 Steven Fett / SkyBridge Alaska
+Copyright (C) 2024 State of Alaska, Department of Transportation & Public Facilities
 
 This software is dual-licensed. You may choose either:
 
