@@ -1,0 +1,100 @@
+# SkyBridge Alaska - Git Ignore File
+
+# Private and sensitive content
+PRIVATE/
+*.private
+*_PRIVATE.*
+*PRIVATE*
+
+# Patent and legal documents
+*.patent
+*Patent*
+*patent*
+
+# Personal strategy documents
+*STRATEGY*
+*strategy*
+
+# Build artifacts
+build/
+dist/
+*.o
+*.so
+*.dll
+*.exe
+*.app
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Firmware build files
+*.bin
+*.hex
+*.elf
+*.map
+
+# Hardware design files (keep source, ignore generated)
+*.bak
+*.kicad_pcb-bak
+*.sch-bak
+
+# Documentation builds
+docs/_build/
+*.pdf.tmp
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Log files
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Archive files (unless specifically needed)
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Large binary files (link to releases instead)
+*.iso
+*.dmg
+*.pkg
+*.deb
+*.rpm
