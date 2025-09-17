@@ -6,6 +6,14 @@ PRIVATE/
 *_PRIVATE.*
 *PRIVATE*
 
+# SSH Keys and sensitive files
+*.key
+*key
+skybridge
+skybridge.pub
+id_*
+*.pem
+
 # Patent and legal documents
 *.patent
 *Patent*
