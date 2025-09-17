@@ -105,7 +105,7 @@ See [LICENSE.md](LICENSE.md) for complete terms.
 - 📋 **[Technical Architecture](ARCHITECTURE.md)** - Complete system specifications
 - 🔬 **[NASA TAIGA Protocol](https://aviationsystems.arc.nasa.gov/publications/2015/NASA-TM-2015-218427.pdf)** - Official ASN.1 specification
 - ⚙️ **[Hardware Specifications](hardware/SPECIFICATIONS.md)** - Component requirements and costs
-- 📱 **[Use Cases](USE_CASES.md)** - Real-world application scenarios
+- **[Pilot Benefits & Use Cases](docs/pilot_benefits.md)** - Direct benefits and real-world scenarios
 - 📊 **[Alaska Aviation Gap Analysis](docs/gap_analysis_official.md)** - Official state study validating SkyBridge's mission
 - 📰 **[Media Coverage](docs/media_coverage.md)** - Washington Post investigation and key statistics
 - 🔍 **[Existing Solutions Analysis](docs/existing_solutions_analysis.md)** - Why current satellite solutions prove SkyBridge's value
@@ -115,7 +115,6 @@ See [LICENSE.md](LICENSE.md) for complete terms.
 - 🤝 **[Industry Partnerships](docs/industry_partnerships.md)** - Active collaboration with Meshtastic and Rokland Technologies
 - 🌐 **[IoT Sensor Integration](docs/iot_sensor_integration.md)** - Expanding safety through distributed environmental monitoring
 - 🎯 **[NASAO Elevator Pitch](docs/elevator_pitch.md)** - Presentation materials for state officials
-- 🛩️ **[Pilot Benefits](docs/pilot_benefits.md)** - Direct benefits for general aviation pilots
 
 ### Contact
 

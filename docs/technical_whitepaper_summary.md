@@ -7,20 +7,20 @@
 
 ## System Capabilities (Prototype + Planned)
 
-### ✅ **Currently Working**
+### Currently Working
 - **[Meshtastic](https://meshtastic.org) mesh network** - Radios deployed and tested with pilots
 - **Text messaging** - Successful pilot-to-pilot communication via mesh
 - **Status updates** - Location and status sharing between aircraft
 - **Basic mobile interface** - Prototype app for radio configuration
 
-### 🚧 **In Active Development**
+### In Active Development
 - **Digital NOTAMs** - State-curated alerts broadcast over mesh
 - **Live Weather Feeds** - Alaska DOT&PF weather pushed to aircraft
 - **ADS-B Integration** - Traffic awareness through mesh network
 - **VHF Transcription** - Base station voice-to-text conversion
 - **Full aviation dashboard** - Complete pilot interface and services
 
-### ✅ **Strategic Infrastructure**
+### Strategic Infrastructure
 - **Airport Installations** - Ground nodes at rural/regional airports
 - **Facility Integration** - Co-located at aviation offices, weather stations, emergency centers
 - **Solar-Powered Wilderness Nodes** - Mountaintops, flight corridors, backcountry airstrips

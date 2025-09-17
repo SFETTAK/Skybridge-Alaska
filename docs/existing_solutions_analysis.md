@@ -12,18 +12,18 @@ Alaska Flight Service has created the Enhanced Special Reporting Service (eSRS) 
 
 ### What This Tells Us
 
-#### ✅ **Government Acknowledges Infrastructure Failures**
+#### Government Acknowledges Infrastructure Failures
 - FAA officially recognizes "remote areas without access to VHF radio communication"
 - Traditional radio infrastructure has systematic gaps
 - Satellite augmentation is necessary for safety
 
-#### ✅ **Current Solutions Are Expensive & Limited**
+#### Current Solutions Are Expensive and Limited
 - **SPOT devices**: $150+ annually + $50-200 device cost
 - **Garmin inReach**: $15-65/month + $300-500 device cost  
 - **Spidertracks**: $30+/month + $1000+ device cost
 - **Only works for emergency alerts** - no weather, traffic, or operational data
 
-#### ✅ **Proves Demand for Peer-to-Peer Communication**
+#### Proves Demand for Peer-to-Peer Communication
 - Pilots are willing to pay for backup communication systems
 - Government is adapting procedures to work around infrastructure gaps
 - Market exists for better solutions
