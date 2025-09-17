@@ -1,8 +1,8 @@
-# SkyBridge Alaska Commercial License Agreement
+# SkyBridge Alaska License
 
 Copyright (C) 2024 State of Alaska, Department of Transportation & Public Facilities
 
-This software is dual-licensed. You may choose either:
+This software is dual-licensed:
 
 ## Option 1: Open Source License (AGPL-3.0)
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

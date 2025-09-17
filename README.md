@@ -4,22 +4,17 @@
 
 ![Aviation Mesh Network](docs/SDR-Mesh-GeneralAviation.png)
 
-## What's In It For YOU as a Pilot?
+## For Pilots
 
-### 🎯 **You'll Never Miss Critical Radio Calls Again**
-You know that sinking feeling when you realize you missed THE critical weather report or traffic advisory that was said once when you were out of range. With SkyBridge, Alaska DOT&PF base stations capture every VHF transmission and send it to your phone as text. **You'll always know what was said.**
+**Never miss critical radio calls again.** You know that sinking feeling when you realize you missed THE critical weather report or traffic advisory that was said once when you were out of range. With SkyBridge, Alaska DOT&PF base stations capture every VHF transmission and send it to your phone as text. You'll always know what was said.
 
-### 📱 **Everything on Your Phone or Tablet**  
-No new expensive avionics to buy or learn. The SkyBridge app runs on the iPhone or Android device you already carry. Your phone becomes your complete aviation services portal.
+**Everything on your phone or tablet.** No new expensive avionics to buy or learn. The SkyBridge app runs on the iPhone or Android device you already carry. Your phone becomes your complete aviation services portal.
 
-### 💰 **You Pay Once, Use Forever**
-$50 for the [Meshtastic](https://meshtastic.org) radio, then you're done. No monthly subscriptions, no satellite fees, no corporate overlords bleeding you dry. **Your radio, your network, your control.**
+**You pay once, use forever.** $50 for the [Meshtastic](https://meshtastic.org) radio, then you're done. No monthly subscriptions, no satellite fees, no corporate overlords bleeding you dry. Your radio, your network, your control.
 
-### 🔒 **You Control What You Share**
-Share your location if you want, keep it private if you don't. Share weather reports to help other pilots, or just receive information. **The network works for you, not against you.**
+**You control what you share.** Share your location if you want, keep it private if you don't. Share weather reports to help other pilots, or just receive information. The network works for you, not against you.
 
-### 🌐 **Your Network Gets Stronger with More Pilots**
-Every pilot who joins makes coverage better for everyone. More reliability, more safety, more information. You're not just buying a radio - **you're joining a community that has each other's backs.**
+**Your network gets stronger with more pilots.** Every pilot who joins makes coverage better for everyone. More reliability, more safety, more information. You're not just buying a radio, you're joining a community that has each other's backs.
 
 ---
 
@@ -29,13 +24,11 @@ Every pilot who joins makes coverage better for everyone. More reliability, more
 
 **SkyBridge is the breakthrough:** A $50 peer-to-peer solution that bypasses failed government infrastructure.
 
-### The Crisis Behind the Solution (Validated by The Washington Post, CDC, NTSB)
-- **Alaska pilots are 36x more likely to die** than the average US worker *(CDC)*
-- **Terrain maps contain errors up to 263+ feet** - directly contributing to fatal crashes *(Washington Post investigation)*
-- **15 "controlled flight into terrain" crashes since 2008** killed 16 people, left 7 seriously injured *(NTSB)*
-- **No reliable weather/NOTAM updates** in remote areas covering 80% of Alaska
-- **Government mapping solutions stuck in budget gridlock** - $30M needed just to finish Alaska *(Washington Post)*
-- **"Mars is better mapped than the state of Alaska"** - Steve Colligan, E-Terra Aviation Safety
+### The Crisis Behind the Solution
+
+Alaska pilots are 36 times more likely to die than the average US worker according to the CDC. Terrain maps contain errors up to 263 feet, directly contributing to fatal crashes as documented in The Washington Post investigation. Since 2008, 15 "controlled flight into terrain" crashes have killed 16 people and left 7 seriously injured according to NTSB data.
+
+The problem is infrastructure: no reliable weather or NOTAM updates in remote areas covering 80% of Alaska. Government mapping solutions remain stuck in budget gridlock, with $30 million needed just to finish mapping Alaska. As aviation safety expert Steve Colligan noted, "Mars is better mapped than the state of Alaska."
 
 ## How It Works
 
@@ -46,18 +39,19 @@ SkyBridge is a **mobile app and web platform** for Alaska aviation services that
 ### Technology Stack
 - **Hardware**: Affordable LoRa radios available from multiple vendors
 - **Protocol**: NASA TAIGA ASN.1 for efficient data compression  
-- **Network**: [Meshtastic](https://meshtastic.org) open-source mesh networking - **proven technology used worldwide**
+- **Network**: [Meshtastic](https://meshtastic.org) open-source mesh networking, proven technology used worldwide
 - **Interface**: Mobile app for iOS and Android
 
-**About [Meshtastic](https://meshtastic.org):** Don't let the name fool you - [Meshtastic](https://meshtastic.org) is serious technology used by emergency responders, hikers, and professionals worldwide. It's proven, reliable, and **specifically designed for situations where everything else fails**.
+**About [Meshtastic](https://meshtastic.org):** Don't let the name fool you. [Meshtastic](https://meshtastic.org) is serious technology used by emergency responders, hikers, and professionals worldwide. It's proven, reliable, and specifically designed for situations where everything else fails.
 
 ### Project Status
-✅ **Operational System** - Working Meshtastic devices and aviation app deployed  
-🚧 **Active Expansion** - Alaska DOT&PF pilot program scaling statewide  
-📋 **Three Provisional Patents Filed** - Protecting core mesh, collision avoidance, and emergency triangulation innovations  
-🤝 **Industry Partnerships** - Active collaboration with Meshtastic and Rokland Technologies  
-🌐 **Multi-State Interest** - Ready for coordinated deployment nationwide  
-⚖️ **IP Protected** - State-owned patents enable confident commercial partnerships  
+
+**Operational prototypes** - Working Meshtastic devices deployed and tested with pilots  
+**Active expansion** - Alaska DOT&PF pilot program scaling statewide  
+**Patent protection** - Three provisional patents filed protecting core innovations  
+**Industry partnerships** - Active collaboration with Meshtastic and Rokland Technologies  
+**Multi-state interest** - Ready for coordinated deployment nationwide  
+**IP protection** - State-owned patents enable confident commercial partnerships  
 
 ![Network Topology](docs/network.jpg)
 
@@ -97,7 +91,7 @@ See [LICENSE.md](LICENSE.md) for complete terms.
 
 **Advanced Integration Capabilities:**
 - **All-in-one radio solution** - [Rokland Technologies](https://rokland.com) partnership developing VHF/ADS-B/SDR/LoRa combination units
-- **Aircraft systems integration** - CANBUS/OBD2/Aero-CAN connectivity for automated reporting
+- **Aircraft systems integration** - CANBUS/OBD2/ARINC 429 connectivity for automated reporting
 - **Base station VHF transcription** - Ground stations automatically convert radio chatter to text and distribute via [Meshtastic](https://meshtastic.org) mesh
 - **Multi-agency support** - RWIS highway weather, UAF Volcanic Institute, USGS seismic networks all supported
 
@@ -124,10 +118,12 @@ See [LICENSE.md](LICENSE.md) for complete terms.
 - 🛩️ **[Pilot Benefits](docs/pilot_benefits.md)** - Direct benefits for general aviation pilots
 
 ### Contact
-- **Technical Lead**: Steven Fett, Alaska DOT&PF - [steven.fett@alaska.gov](mailto:steven.fett@alaska.gov)
-- **Engineering**: Ryan Marlow, Alaska DOT&PF - [ryan.marlow@alaska.gov](mailto:ryan.marlow@alaska.gov)
-- **Project**: https://skybridgealaska.net
-- **Repository**: https://github.com/SFETTAK/Skybridge-Alaska
+
+Steven Fett, Alaska DOT&PF - [steven.fett@alaska.gov](mailto:steven.fett@alaska.gov)  
+Ryan Marlow, Alaska DOT&PF - [ryan.marlow@alaska.gov](mailto:ryan.marlow@alaska.gov)
+
+**Project**: https://skybridgealaska.net  
+**Repository**: https://github.com/SFETTAK/Skybridge-Alaska
 
 ---
 

@@ -3,16 +3,16 @@
 
 ## What SkyBridge Means for YOU
 
-### 🎯 **You'll Never Miss Critical Radio Calls Again**
+### Never Miss Critical Radio Calls Again
 You know that sinking feeling when you realize you missed THE critical weather report or traffic advisory that was said once when you were out of range. With SkyBridge, Alaska DOT&PF base stations capture every VHF transmission and send it to your phone as text. You'll always know what was said.
 
-### 💰 **You Pay Once, Use Forever**  
+### You Pay Once, Use Forever  
 $50 for the [Meshtastic](https://meshtastic.org) radio, then you're done. No monthly subscriptions, no satellite fees, no corporate overlords bleeding you dry. Your radio, your network, your control.
 
 ### 🔒 **You Control What You Share**
 Your privacy is sacred. Share your location if you want, keep it private if you don't. Share weather reports to help other pilots, or just receive information. The network works for you, not against you.
 
-### 📱 **Everything on Your Phone or Tablet**
+### Everything on Your Phone or Tablet
 No new expensive avionics to buy or learn. No complicated installations. The SkyBridge app runs on the iPhone or Android device you already carry. Everything you need in one familiar interface.
 
 ### 🌐 **Your Network Gets Stronger**
