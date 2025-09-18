@@ -62,11 +62,11 @@ SkyBridge is a **mobile app and web platform** for Alaska aviation services that
 **Dual licensing supports both public safety and commercial innovation:**
 
 #### **Free Use (AGPL-3.0)**
-- ✅ **State and federal agencies** (Alaska DOT&PF, FAA, NOAA, NWS)
-- ✅ **Search and rescue organizations** 
-- ✅ **Educational institutions**
-- ✅ **Small Part 135 operators** (fewer than 5 aircraft)
-- ✅ **501(c)(3) nonprofits** serving Alaska aviation
+- **State and federal agencies** (Alaska DOT&PF, FAA, NOAA, NWS)
+- **Search and rescue organizations** 
+- **Educational institutions**
+- **Small Part 135 operators** (fewer than 5 aircraft)
+- **501(c)(3) nonprofits** serving Alaska aviation
 
 #### **Commercial License Required**
 - Part 135 operators with 5+ aircraft
@@ -83,11 +83,11 @@ See [LICENSE.md](LICENSE.md) for complete terms.
 ### For State Aviation Officials
 
 **Why SkyBridge Matters to Your State:**
-- 🏔️ **Rural aviation challenges aren't unique to Alaska** - Montana, Idaho, Wyoming, Colorado face similar terrain and weather risks
-- 💰 **$50 nodes vs $200K ground stations** - Economically viable for rural airports and pilot communities  
-- 🏛️ **State control, not federal dependency** - Community-operated infrastructure under state oversight
-- 📈 **Revenue potential** - Commercial licensing funds ongoing development while keeping core system open source
-- 🤝 **Interstate cooperation** - Shared development costs, shared safety benefits
+- **Rural aviation challenges aren't unique to Alaska** - Montana, Idaho, Wyoming, Colorado face similar terrain and weather risks
+- **$50 nodes vs $200K ground stations** - Economically viable for rural airports and pilot communities  
+- **State control, not federal dependency** - Community-operated infrastructure under state oversight
+- **Revenue potential** - Commercial licensing funds ongoing development while keeping core system open source
+- **Interstate cooperation** - Shared development costs, shared safety benefits
 
 **Advanced Integration Capabilities:**
 - **All-in-one radio solution** - [Rokland Technologies](https://rokland.com) partnership developing VHF/ADS-B/SDR/LoRa combination units
@@ -102,19 +102,19 @@ See [LICENSE.md](LICENSE.md) for complete terms.
 - Seeking 3-5 additional states for coordinated deployment
 
 ### Technical Resources
-- 📋 **[Technical Architecture](ARCHITECTURE.md)** - Complete system specifications
-- 🔬 **[NASA TAIGA Protocol](https://aviationsystems.arc.nasa.gov/publications/2015/NASA-TM-2015-218427.pdf)** - Official ASN.1 specification
-- ⚙️ **[Hardware Specifications](hardware/SPECIFICATIONS.md)** - Component requirements and costs
+- **[Technical Architecture](ARCHITECTURE.md)** - Complete system specifications
+- **[NASA TAIGA Protocol](https://aviationsystems.arc.nasa.gov/publications/2015/NASA-TM-2015-218427.pdf)** - Official ASN.1 specification
+- **[Hardware Specifications](hardware/SPECIFICATIONS.md)** - Component requirements and costs
 - **[Pilot Benefits & Use Cases](docs/pilot_benefits.md)** - Direct benefits and real-world scenarios
-- 📊 **[Alaska Aviation Gap Analysis](docs/gap_analysis_official.md)** - Official state study validating SkyBridge's mission
-- 📰 **[Media Coverage](docs/media_coverage.md)** - Washington Post investigation and key statistics
-- 🔍 **[Existing Solutions Analysis](docs/existing_solutions_analysis.md)** - Why current satellite solutions prove SkyBridge's value
-- 📄 **[Technical Whitepaper Summary](docs/technical_whitepaper_summary.md)** - Complete system capabilities and competitive analysis
-- 📋 **[Complete Technical Whitepaper](docs/complete_technical_whitepaper.md)** - Full project documentation and deployment strategy
-- ⚖️ **[Intellectual Property Overview](docs/intellectual_property_overview.md)** - Patent portfolio protecting core innovations
-- 🤝 **[Industry Partnerships](docs/industry_partnerships.md)** - Active collaboration with Meshtastic and Rokland Technologies
-- 🌐 **[IoT Sensor Integration](docs/iot_sensor_integration.md)** - Expanding safety through distributed environmental monitoring
-- 🎯 **[NASAO Elevator Pitch](docs/elevator_pitch.md)** - Presentation materials for state officials
+- **[Alaska Aviation Gap Analysis](docs/gap_analysis_official.md)** - Official state study validating SkyBridge's mission
+- **[Media Coverage](docs/media_coverage.md)** - Washington Post investigation and key statistics
+- **[Existing Solutions Analysis](docs/existing_solutions_analysis.md)** - Why current satellite solutions prove SkyBridge's value
+- **[Technical Whitepaper Summary](docs/technical_whitepaper_summary.md)** - Complete system capabilities and competitive analysis
+- **[Complete Technical Whitepaper](docs/complete_technical_whitepaper.md)** - Full project documentation and deployment strategy
+- **[Intellectual Property Overview](docs/intellectual_property_overview.md)** - Patent portfolio protecting core innovations
+- **[Industry Partnerships](docs/industry_partnerships.md)** - Active collaboration with Meshtastic and Rokland Technologies
+- **[IoT Sensor Integration](docs/iot_sensor_integration.md)** - Expanding safety through distributed environmental monitoring
+- **[NASAO Elevator Pitch](docs/elevator_pitch.md)** - Presentation materials for state officials
 
 ### Contact
 
