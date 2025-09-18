@@ -147,11 +147,11 @@ def encrypted_aggregation(encrypted_temps):
 - **Concurrent Users**: 50-100 aircraft per region
 - **Data Volume**: Weather updates every 5 minutes
 
-#### Target Performance Goals
-- **Scalability**: 1000+ concurrent aircraft
-- **Data Throughput**: 10x current capacity
-- **Latency**: <500ms for critical messages
-- **Reliability**: 99.9% message delivery
+#### Target Performance Goals (Realistic for LoRa/Meshtastic)
+- **Scalability**: 100-200 concurrent aircraft (realistic for LoRa mesh)
+- **Data Throughput**: 2-3x current capacity through compression
+- **Latency**: 5-15 seconds for critical messages (realistic for mesh)
+- **Reliability**: 95% delivery within coverage (LoRa limitations)
 
 ### Performance Optimization Strategies
 
