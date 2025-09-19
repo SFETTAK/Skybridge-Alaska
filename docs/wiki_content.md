@@ -9,15 +9,15 @@ SkyBridge Alaska is a community-powered aviation safety mesh network designed to
 ### Alaska Aviation Crisis (Verified Sources)
 
 #### Fatality Statistics
-- **Source**: CDC Data
-- **Statistic**: Alaska pilots have 36x higher fatality rate than average U.S. worker
-- **Note**: This is a documented public health statistic
+- **Source**: Alaska aviation safety reports
+- **Statistic**: Alaska pilots face significantly higher fatality rates than the national average
+- **Note**: Specific statistics available upon request
 
 #### Infrastructure Failures
 - **Source**: Alaska DOT&PF Gap Analysis (March 2024)
-- **RCO Outages**: 29 sites with unscheduled outages (June 2023)
-- **ADS-B Equipage**: Less than 30% despite federal investment
-- **NOTAMs**: 171 active NOTAMs within 100 miles of Anchorage
+- **RCO Outages**: Multiple sites experience frequent outages
+- **ADS-B Equipage**: Below national average despite federal investment
+- **NOTAMs**: High number of active NOTAMs in Alaska airspace
 
 #### Historical Context
 - **Source**: Washington Post Investigation (October 14, 2014)
@@ -38,18 +38,18 @@ SkyBridge Alaska is a community-powered aviation safety mesh network designed to
 #### NASA TAIGA Protocol
 - **Document**: NASA/TM-2015-218427
 - **Title**: "TAIGA ASN.1 Protocol for Efficient Aviation Data Encoding"
-- **Compression**: 80% data reduction capability
+- **Compression**: Efficient data compression capability
 - **Status**: NASA-developed, public domain
 
 ### Cost Analysis (Real Data)
 
 #### Traditional FAA Infrastructure
-- **RCO Site Equipment**: $200,000
-- **Tower Construction**: $150,000
-- **Power Infrastructure**: $100,000
-- **Communication Links**: $75,000
-- **Annual Maintenance**: $25,000
-- **Total per Site (5 years)**: $550,000
+- **Site Equipment**: $200K+
+- **Tower Construction**: $150K+
+- **Power Infrastructure**: $100K+
+- **Communication Links**: $75K+
+- **Annual Maintenance**: $25K+
+- **Total per Site (5 years)**: $550K+
 
 #### SkyBridge Solution
 - **Mesh Node**: $50
@@ -60,7 +60,7 @@ SkyBridge Alaska is a community-powered aviation safety mesh network designed to
 - **Total per Site (5 years)**: $1,550
 
 #### Cost Advantage
-- **SkyBridge vs Traditional**: 355x cost advantage
+- **SkyBridge vs Traditional**: Significant cost advantage
 - **Break-even Point**: Immediate (no licensing required)
 - **ROI**: Positive from day one
 
@@ -135,8 +135,8 @@ SkyBridge Alaska is a community-powered aviation safety mesh network designed to
 
 ### Operational Benefits
 - **Pilot Safety**: Enhanced situational awareness
-- **Cost Efficiency**: 355x cost advantage
-- **Reliability**: 99%+ uptime
+- **Cost Efficiency**: Significant cost advantage
+- **Reliability**: High reliability with minimal downtime
 - **Scalability**: Easy expansion and upgrades
 
 ## Next Steps

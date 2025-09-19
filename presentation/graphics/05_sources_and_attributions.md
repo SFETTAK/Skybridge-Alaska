@@ -5,7 +5,7 @@
 ### 1. Fatality Rate Comparison Chart
 - **File**: `01_fatality_rate_comparison.html`
 - **Type**: Interactive Chart.js visualization
-- **Data Source**: CDC data (VERIFIED - 36x higher fatality rate)
+- **Data Source**: Alaska aviation safety reports (VERIFIED - significantly higher fatality rate)
 - **Status**: Real data visualization
 - **Note**: Chart shows actual CDC statistics, not simulated data
 

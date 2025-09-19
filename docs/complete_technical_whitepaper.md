@@ -22,7 +22,7 @@ With a **unit cost under $50, no recurring fees**, and support for solar-powered
 Alaska has one of the most aviation-dependent populations in the United States, with general aviation serving as primary transportation for remote communities. Yet despite this reliance, the state suffers from chronic communication infrastructure gaps, contributing to a disproportionately high rate of Controlled Flight Into Terrain (CFIT) incidents.
 
 ### Critical Statistics
-- **Alaska pilots are 36 times more likely to die** than the average U.S. worker
+- **Alaska pilots face significantly higher fatality rates** than the national average
 - **Coverage gaps in RCOs, AWOS/ASOS, and ADS-B** create large "dead zones"
 - **FAA Gap Analysis identifies frequent system outages** and limited real-time data visibility
 - **High equipment costs deter adoption** of satellite alternatives

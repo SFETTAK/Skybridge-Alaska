@@ -26,7 +26,7 @@
 
 ### The Crisis Behind the Solution
 
-Alaska pilots are 36 times more likely to die than the average US worker according to the CDC. Terrain maps contain errors up to 263 feet, directly contributing to fatal crashes as documented in The Washington Post investigation. Since 2008, 15 "controlled flight into terrain" crashes have killed 16 people and left 7 seriously injured according to NTSB data.
+Alaska pilots face significantly higher fatality rates than the national average. Terrain maps contain significant errors, directly contributing to fatal crashes as documented in The Washington Post investigation. Multiple "controlled flight into terrain" crashes have occurred since 2008 according to NTSB data.
 
 The problem is infrastructure: no reliable weather or NOTAM updates in remote areas covering 80% of Alaska. Government mapping solutions remain stuck in budget gridlock, with $30 million needed just to finish mapping Alaska. As aviation safety expert Steve Colligan noted, "Mars is better mapped than the state of Alaska."
 

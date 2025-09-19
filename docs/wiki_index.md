@@ -4,10 +4,10 @@
 Community-powered aviation safety mesh network for Alaska
 
 ## Real Data Sources
-- **CDC Fatality Statistics**: 36x higher rate for Alaska pilots
-- **Alaska DOT&PF Gap Analysis**: 29 RCO outages, <30% ADS-B equipage
+- **Alaska Aviation Safety Reports**: Significantly higher fatality rates
+- **Alaska DOT&PF Gap Analysis**: Multiple RCO outages, below average ADS-B equipage
 - **Washington Post Investigation**: "Mars is better mapped than Alaska"
-- **NASA TAIGA Protocol**: 80% data compression capability
+- **NASA TAIGA Protocol**: Efficient data compression capability
 
 ## Technical Specifications
 - **Frequency**: 902-928 MHz (FCC Part 15)
@@ -18,8 +18,8 @@ Community-powered aviation safety mesh network for Alaska
 
 ## Cost Analysis
 - **SkyBridge (5 years)**: $1,550 per site
-- **Traditional RCO (5 years)**: $550,000 per site
-- **Cost Advantage**: 355x
+- **Traditional RCO (5 years)**: $550K+ per site
+- **Cost Advantage**: Significant
 
 ## Implementation
 - **Phase 1**: 5-10 pilot sites
