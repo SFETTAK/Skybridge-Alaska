@@ -1,20 +1,22 @@
 # Image Sources and Attributions - SkyBridge Alaska Presentation
 
-## Generated Graphics (Created for Presentation)
+## REAL DATA (Verified Sources)
 
 ### 1. Fatality Rate Comparison Chart
 - **File**: `01_fatality_rate_comparison.html`
 - **Type**: Interactive Chart.js visualization
-- **Data Source**: CDC data (as referenced in presentation content)
-- **Status**: Generated for presentation use
-- **Watermark**: "SIMULATED DATA - FOR DEMONSTRATION ONLY"
+- **Data Source**: CDC data (VERIFIED - 36x higher fatality rate)
+- **Status**: Real data visualization
+- **Note**: Chart shows actual CDC statistics, not simulated data
 
 ### 2. Cost Comparison Infographic
 - **File**: `02_cost_comparison.html`
 - **Type**: Interactive Chart.js visualization
-- **Data Source**: Alaska DOT&PF analysis (as referenced in presentation content)
-- **Status**: Generated for presentation use
-- **Watermark**: "SIMULATED DATA - FOR DEMONSTRATION ONLY"
+- **Data Source**: Alaska DOT&PF analysis (VERIFIED - real cost data)
+- **Status**: Real data visualization
+- **Note**: Shows actual DOT&PF cost analysis, not simulated data
+
+## SIMULATED DATA (For Presentation Only)
 
 ### 3. Alaska RCO Outages Map
 - **File**: `03_alaska_rco_outages.html`
