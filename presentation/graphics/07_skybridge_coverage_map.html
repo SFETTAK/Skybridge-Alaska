@@ -25,20 +25,20 @@
     
     <div class="coverage-stats">
         <div class="stat-item">
-            <div class="stat-number">50+</div>
-            <div class="stat-label">Mile Range</div>
+            <div class="stat-number">Extended</div>
+            <div class="stat-label">Range Capabilities</div>
         </div>
         <div class="stat-item">
             <div class="stat-number">$50</div>
             <div class="stat-label">Per Node</div>
         </div>
         <div class="stat-item">
-            <div class="stat-number">80%</div>
+            <div class="stat-number">Efficient</div>
             <div class="stat-label">Data Compression</div>
         </div>
         <div class="stat-item">
-            <div class="stat-number">99%+</div>
-            <div class="stat-label">Uptime</div>
+            <div class="stat-number">High</div>
+            <div class="stat-label">Reliability</div>
         </div>
     </div>
     
@@ -46,7 +46,7 @@
     <div class="legend">
         <h4>Coverage Legend</h4>
         <div style="color: #27ae60;">● SkyBridge Nodes (Active)</div>
-        <div style="color: #3498db;">● Coverage Areas (50+ mile radius)</div>
+        <div style="color: #3498db;">● Coverage Areas (Extended range)</div>
         <div style="color: #f39c12;">● Major Airports</div>
         <div style="color: #e74c3c;">● Current RCO Outages</div>
         <div style="color: #9b59b6;">● DOT&PF Base Stations</div>
@@ -105,7 +105,7 @@
                 fillColor: '#27ae60',
                 fillOpacity: 0.8,
                 radius: 10
-            }).addTo(map).bindPopup(`<b>${node.name}</b><br>SkyBridge Node<br>50+ mile coverage`);
+            }).addTo(map).bindPopup(`<b>${node.name}</b><br>SkyBridge Node<br>Extended range coverage`);
             
             // Add coverage circles
             L.circle([node.lat, node.lng], {
