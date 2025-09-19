@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkyBridge Alaska - Image Gallery</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .gallery-container { width: 1000px; margin: 20px auto; }
+        .title { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+        .subtitle { text-align: center; font-size: 18px; color: #7f8c8d; margin-bottom: 30px; }
+        .watermark { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        .image-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; }
+        .image-card { background: #f8f9fa; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .image-placeholder { width: 100%; height: 200px; background: #e9ecef; border: 2px dashed #6c757d; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .image-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
+        .image-description { font-size: 14px; color: #6c757d; margin-bottom: 10px; }
+        .image-source { font-size: 12px; color: #999; font-style: italic; }
+        .section-title { font-size: 24px; font-weight: bold; margin: 40px 0 20px 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="watermark">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+    <div class="gallery-container">
+        <div class="title">SkyBridge Alaska - Image Gallery</div>
+        <div class="subtitle">Aviation Safety, Technology, and Infrastructure Visuals</div>
+        
+        <div class="section-title">Alaska Aviation Infrastructure</div>
+        <div class="image-grid">
+            <div class="image-card">
+                <div class="image-placeholder">Alaska RCO Tower<br><small>Remote Communications Outlet</small></div>
+                <div class="image-title">RCO Infrastructure</div>
+                <div class="image-description">Traditional FAA Remote Communications Outlet site in Alaska</div>
+                <div class="image-source">Source: FAA Alaska Region</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">Alaska Weather Radar<br><small>NEXRAD Coverage Gap</small></div>
+                <div class="image-title">Weather Radar Gap</div>
+                <div class="image-description">Limited NEXRAD coverage in Alaska compared to lower 48</div>
+                <div class="image-source">Source: National Weather Service</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">Alaska Flight Service Station<br><small>FSS Operations</small></div>
+                <div class="image-title">Flight Service Station</div>
+                <div class="image-description">Alaska DOT&PF Flight Service Station operations center</div>
+                <div class="image-source">Source: Alaska DOT&PF</div>
+            </div>
+        </div>
+
+        <div class="section-title">SkyBridge Technology</div>
+        <div class="image-grid">
+            <div class="image-card">
+                <div class="image-placeholder">Meshtastic Radio<br><small>LoRa Mesh Node</small></div>
+                <div class="image-title">Mesh Radio Node</div>
+                <div class="image-description">$50 Meshtastic radio with LoRa technology</div>
+                <div class="image-source">Source: Meshtastic.org</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">Solar Power System<br><small>Remote Deployment</small></div>
+                <div class="image-title">Solar Power</div>
+                <div class="image-description">Solar-powered repeater for remote Alaska deployment</div>
+                <div class="image-source">Source: SkyBridge Prototype</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">Mobile App Interface<br><small>Pilot Dashboard</small></div>
+                <div class="image-title">Mobile App</div>
+                <div class="image-description">SkyBridge mobile app for pilots and operators</div>
+                <div class="image-source">Source: SkyBridge Development</div>
+            </div>
+        </div>
+
+        <div class="section-title">Alaska Aviation Safety</div>
+        <div class="image-grid">
+            <div class="image-card">
+                <div class="image-placeholder">Alaska Aircraft<br><small>General Aviation</small></div>
+                <div class="image-title">General Aviation</div>
+                <div class="image-description">Alaska's critical general aviation fleet</div>
+                <div class="image-source">Source: Alaska Airmen's Association</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">Mountain Pass Flying<br><small>Challenging Terrain</small></div>
+                <div class="image-title">Mountain Passes</div>
+                <div class="image-description">Challenging Alaska terrain requiring enhanced safety</div>
+                <div class="image-source">Source: Alaska DOT&PF</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">Emergency Response<br><small>Search and Rescue</small></div>
+                <div class="image-title">Emergency Response</div>
+                <div class="image-description">Alaska's critical search and rescue operations</div>
+                <div class="image-source">Source: Alaska State Troopers</div>
+            </div>
+        </div>
+
+        <div class="section-title">NASA TAIGA Protocol</div>
+        <div class="image-grid">
+            <div class="image-card">
+                <div class="image-placeholder">NASA Technical Document<br><small>TAIGA ASN.1</small></div>
+                <div class="image-title">NASA TAIGA</div>
+                <div class="image-description">Official NASA Technical Memorandum TM-2015-218427</div>
+                <div class="image-source">Source: NASA Aviation Systems</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">Data Compression<br><small>80% Reduction</small></div>
+                <div class="image-title">Data Compression</div>
+                <div class="image-description">80% data compression using NASA TAIGA protocol</div>
+                <div class="image-source">Source: NASA Research</div>
+            </div>
+            <div class="image-card">
+                <div class="image-placeholder">ASN.1 Encoding<br><small>Packed Encoding Rules</small></div>
+                <div class="image-title">ASN.1 Encoding</div>
+                <div class="image-description">Packed Encoding Rules for minimal bandwidth</div>
+                <div class="image-source">Source: NASA Technical Documentation</div>
+            </div>
+        </div>
+
+        <div class="source">Note: All images are placeholders for demonstration purposes. Real images will be sourced from official agencies and partners.</div>
+    </div>
+</body>
+</html>

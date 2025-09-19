@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Call to Action - Multi-State Partnership</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .slide-container {
+            width: 90%;
+            max-width: 1200px;
+            padding: 40px;
+        }
+        .slide-title {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            text-align: center;
+            color: white;
+        }
+        .cta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .cta-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .cta-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #f39c12;
+        }
+        .cta-list {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .cta-item {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        .cta-item::before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .partnership-box {
+            background: rgba(39, 174, 96, 0.2);
+            border: 2px solid #27ae60;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .partnership-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #27ae60;
+        }
+        .partnership-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .partnership-step {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .step-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+        .step-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .step-description {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .contact-info {
+            background: rgba(52, 73, 94, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .contact-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #f39c12;
+        }
+        .contact-item {
+            font-size: 18px;
+            margin: 15px 0;
+        }
+        .contact-email {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .watermark {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+    <div class="slide-container">
+        <div class="slide-title">Join the SkyBridge Revolution</div>
+        
+        <div class="cta-grid">
+            <div class="cta-box">
+                <div class="cta-title">Immediate Benefits</div>
+                <div class="cta-list">
+                    <div class="cta-item">40% faster emergency response times</div>
+                    <div class="cta-item">90% reduction in search areas</div>
+                    <div class="cta-item">Real-time weather and NOTAM data</div>
+                    <div class="cta-item">State ownership and control</div>
+                    <div class="cta-item">No federal dependency</div>
+                    <div class="cta-item">Commercial licensing revenue</div>
+                </div>
+            </div>
+            
+            <div class="cta-box">
+                <div class="cta-title">Pilot Program Requirements</div>
+                <div class="cta-list">
+                    <div class="cta-item">3-5 states for coordinated deployment</div>
+                    <div class="cta-item">DOT&PF partnership agreement</div>
+                    <div class="cta-item">Pilot community engagement</div>
+                    <div class="cta-item">Technical briefing participation</div>
+                    <div class="cta-item">Multi-state cooperation framework</div>
+                    <div class="cta-item">Live system demonstration</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="partnership-box">
+            <div class="partnership-title">Partnership Roadmap</div>
+            <div class="partnership-steps">
+                <div class="partnership-step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Technical Briefing</div>
+                    <div class="step-description">Schedule 30-minute technical overview</div>
+                </div>
+                <div class="partnership-step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Pilot Program</div>
+                    <div class="step-description">Deploy 5-10 nodes in your state</div>
+                </div>
+                <div class="partnership-step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Full Deployment</div>
+                    <div class="step-description">Scale to complete state coverage</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <div class="contact-title">Ready to Get Started?</div>
+            <div class="contact-item">
+                <strong>Steven Fett, Alaska DOT&PF</strong><br>
+                <a href="mailto:steven.fett@alaska.gov" class="contact-email">steven.fett@alaska.gov</a>
+            </div>
+            <div class="contact-item">
+                <strong>Ryan Marlow, Alaska DOT&PF</strong><br>
+                <a href="mailto:ryan.marlow@alaska.gov" class="contact-email">ryan.marlow@alaska.gov</a>
+            </div>
+            <div class="contact-item">
+                <strong>Website:</strong> <a href="https://skybridgealaska.net" class="contact-email">skybridgealaska.net</a>
+            </div>
+            <div class="contact-item" style="margin-top: 30px; font-size: 20px; font-weight: bold; color: #f39c12;">
+                Let's Save Lives Together
+            </div>
+        </div>
+    </div>
+</body>
+</html>

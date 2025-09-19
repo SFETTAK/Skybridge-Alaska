@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkyBridge Cost-Benefit Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .chart-container { width: 1000px; height: 600px; margin: 20px auto; }
+        .title { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+        .subtitle { text-align: center; font-size: 18px; color: #7f8c8d; margin-bottom: 30px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+        .watermark { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 30px 0; }
+        .comparison-box { padding: 20px; border-radius: 10px; }
+        .skybridge { background: rgba(39, 174, 96, 0.1); border: 2px solid #27ae60; }
+        .traditional { background: rgba(231, 76, 60, 0.1); border: 2px solid #e74c3c; }
+        .box-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+        .skybridge .box-title { color: #27ae60; }
+        .traditional .box-title { color: #e74c3c; }
+        .cost-item { margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 5px; }
+        .cost-label { font-weight: bold; }
+        .cost-value { float: right; font-weight: bold; }
+        .savings { background: rgba(39, 174, 96, 0.2); padding: 20px; margin: 20px 0; border-radius: 10px; text-align: center; }
+        .savings-number { font-size: 36px; font-weight: bold; color: #27ae60; }
+        .savings-label { font-size: 18px; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="watermark">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+    <div class="title">SkyBridge vs Traditional Infrastructure</div>
+    <div class="subtitle">Comprehensive Cost-Benefit Analysis</div>
+    
+    <div class="comparison-grid">
+        <div class="comparison-box skybridge">
+            <div class="box-title">SkyBridge Solution</div>
+            <div class="cost-item">
+                <span class="cost-label">Mesh Node (per site)</span>
+                <span class="cost-value">$50</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Installation</span>
+                <span class="cost-value">$200</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Solar Power System</span>
+                <span class="cost-value">$300</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Gateway Equipment</span>
+                <span class="cost-value">$1,000</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Annual Maintenance</span>
+                <span class="cost-value">$100</span>
+            </div>
+            <div class="cost-item" style="border-top: 2px solid #27ae60; margin-top: 15px; padding-top: 15px;">
+                <span class="cost-label"><strong>Total per Site (5 years)</strong></span>
+                <span class="cost-value"><strong>$1,550</strong></span>
+            </div>
+        </div>
+        
+        <div class="comparison-box traditional">
+            <div class="box-title">Traditional FAA Infrastructure</div>
+            <div class="cost-item">
+                <span class="cost-label">RCO Site Equipment</span>
+                <span class="cost-value">$200,000</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Tower Construction</span>
+                <span class="cost-value">$150,000</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Power Infrastructure</span>
+                <span class="cost-value">$100,000</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Communication Links</span>
+                <span class="cost-value">$75,000</span>
+            </div>
+            <div class="cost-item">
+                <span class="cost-label">Annual Maintenance</span>
+                <span class="cost-value">$25,000</span>
+            </div>
+            <div class="cost-item" style="border-top: 2px solid #e74c3c; margin-top: 15px; padding-top: 15px;">
+                <span class="cost-label"><strong>Total per Site (5 years)</strong></span>
+                <span class="cost-value"><strong>$550,000</strong></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="savings">
+        <div class="savings-number">355x</div>
+        <div class="savings-label">Cost Advantage Over Traditional Infrastructure</div>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="costChart"></canvas>
+    </div>
+    
+    <div class="source">Source: Alaska DOT&PF Analysis - SkyBridge Technical Specifications</div>
+
+    <script>
+        const ctx = document.getElementById('costChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['SkyBridge (5 years)', 'Traditional RCO (5 years)', 'Weather Radar Unit', 'ADS-B Ground Station', 'VOR Site'],
+                datasets: [{
+                    label: 'Total Cost ($)',
+                    data: [1550, 550000, 350000, 200000, 300000],
+                    backgroundColor: ['#27ae60', '#e74c3c', '#e74c3c', '#e74c3c', '#e74c3c'],
+                    borderColor: ['#229954', '#c0392b', '#c0392b', '#c0392b', '#c0392b'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Infrastructure Cost Comparison - 5 Year Total',
+                        font: { size: 20, weight: 'bold' }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cost (Log Scale)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Infrastructure Type'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

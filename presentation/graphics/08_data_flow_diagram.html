@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkyBridge Data Flow Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .diagram-container { width: 1200px; height: 800px; margin: 20px auto; border: 2px solid #333; }
+        .title { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+        .subtitle { text-align: center; font-size: 18px; color: #7f8c8d; margin-bottom: 30px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+        .watermark { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        .node { fill: #3498db; stroke: #2980b9; stroke-width: 2px; }
+        .aircraft { fill: #e74c3c; stroke: #c0392b; stroke-width: 2px; }
+        .gateway { fill: #27ae60; stroke: #229954; stroke-width: 2px; }
+        .base-station { fill: #f39c12; stroke: #e67e22; stroke-width: 2px; }
+        .internet { fill: #9b59b6; stroke: #8e44ad; stroke-width: 2px; }
+        .connection { stroke: #34495e; stroke-width: 3px; fill: none; }
+        .data-flow { stroke: #e74c3c; stroke-width: 2px; fill: none; stroke-dasharray: 5,5; }
+        .label { font-size: 12px; font-weight: bold; text-anchor: middle; }
+        .data-label { font-size: 10px; fill: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="watermark">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+    <div class="title">SkyBridge Data Flow Architecture</div>
+    <div class="subtitle">NASA TAIGA Protocol - 80% Data Compression Pipeline</div>
+    <div class="diagram-container" id="diagram"></div>
+    <div class="source">Source: SkyBridge Technical Architecture - NASA TAIGA Protocol Integration</div>
+
+    <script>
+        const width = 1200;
+        const height = 800;
+        const svg = d3.select("#diagram")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Define system components with positions
+        const components = [
+            {id: "aircraft1", x: 100, y: 150, type: "aircraft", label: "Aircraft 1", data: "VHF Radio"},
+            {id: "aircraft2", x: 200, y: 100, type: "aircraft", label: "Aircraft 2", data: "VHF Radio"},
+            {id: "aircraft3", x: 300, y: 200, type: "aircraft", label: "Aircraft 3", data: "VHF Radio"},
+            {id: "node1", x: 150, y: 300, type: "node", label: "Mesh Node 1", data: "LoRa Receiver"},
+            {id: "node2", x: 250, y: 350, type: "node", label: "Mesh Node 2", data: "LoRa Receiver"},
+            {id: "node3", x: 350, y: 250, type: "node", label: "Mesh Node 3", data: "LoRa Receiver"},
+            {id: "gateway", x: 500, y: 350, type: "gateway", label: "Gateway", data: "TAIGA Processor"},
+            {id: "compression", x: 600, y: 300, type: "internet", label: "80% Compression", data: "NASA TAIGA"},
+            {id: "base1", x: 800, y: 200, type: "base-station", label: "DOT&PF Base", data: "Weather Data"},
+            {id: "base2", x: 900, y: 300, type: "base-station", label: "FSS Station", data: "NOTAMs"},
+            {id: "internet", x: 700, y: 100, type: "internet", label: "Internet", data: "Cloud Services"},
+            {id: "mobile", x: 1000, y: 150, type: "aircraft", label: "Pilot App", data: "Mobile Device"}
+        ];
+
+        // Define connections
+        const connections = [
+            {source: "aircraft1", target: "node1", type: "connection"},
+            {source: "aircraft2", target: "node1", type: "connection"},
+            {source: "aircraft2", target: "node2", type: "connection"},
+            {source: "aircraft3", target: "node3", type: "connection"},
+            {source: "node1", target: "node2", type: "connection"},
+            {source: "node2", target: "node3", type: "connection"},
+            {source: "node1", target: "gateway", type: "connection"},
+            {source: "node2", target: "gateway", type: "connection"},
+            {source: "node3", target: "gateway", type: "connection"},
+            {source: "gateway", target: "compression", type: "data-flow"},
+            {source: "compression", target: "base1", type: "data-flow"},
+            {source: "compression", target: "base2", type: "data-flow"},
+            {source: "compression", target: "internet", type: "data-flow"},
+            {source: "internet", target: "mobile", type: "data-flow"},
+            {source: "base1", target: "mobile", type: "data-flow"},
+            {source: "base2", target: "mobile", type: "data-flow"}
+        ];
+
+        // Draw connections
+        svg.selectAll(".connection")
+            .data(connections)
+            .enter()
+            .append("line")
+            .attr("class", d => d.type)
+            .attr("x1", d => components.find(c => c.id === d.source).x)
+            .attr("y1", d => components.find(c => c.id === d.source).y)
+            .attr("x2", d => components.find(c => c.id === d.target).x)
+            .attr("y2", d => components.find(c => c.id === d.target).y);
+
+        // Draw components
+        svg.selectAll(".component")
+            .data(components)
+            .enter()
+            .append("circle")
+            .attr("class", d => d.type)
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y)
+            .attr("r", d => d.type === "aircraft" ? 15 : d.type === "gateway" ? 20 : d.type === "base-station" ? 18 : 12);
+
+        // Add labels
+        svg.selectAll(".label")
+            .data(components)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", d => d.x)
+            .attr("y", d => d.y + 35)
+            .text(d => d.label);
+
+        // Add data type labels
+        svg.selectAll(".data-label")
+            .data(components)
+            .enter()
+            .append("text")
+            .attr("class", "data-label")
+            .attr("x", d => d.x)
+            .attr("y", d => d.y + 50)
+            .text(d => d.data);
+
+        // Add title
+        svg.append("text")
+            .attr("x", width/2)
+            .attr("y", 30)
+            .attr("class", "label")
+            .style("font-size", "20px")
+            .style("font-weight", "bold")
+            .text("Real-Time Data Flow: VHF → LoRa → TAIGA → Mobile");
+
+        // Add legend
+        const legend = svg.append("g")
+            .attr("transform", "translate(50, 600)");
+
+        const legendItems = [
+            {color: "#e74c3c", label: "Aircraft/VHF", type: "solid"},
+            {color: "#3498db", label: "Mesh Nodes", type: "solid"},
+            {color: "#27ae60", label: "Gateway", type: "solid"},
+            {color: "#f39c12", label: "DOT&PF Base", type: "solid"},
+            {color: "#9b59b6", label: "Internet/Cloud", type: "solid"},
+            {color: "#e74c3c", label: "Data Flow (80% Compressed)", type: "dashed"}
+        ];
+
+        legend.selectAll(".legend-item")
+            .data(legendItems)
+            .enter()
+            .append("g")
+            .attr("class", "legend-item")
+            .attr("transform", (d, i) => `translate(0, ${i * 25})`)
+            .each(function(d) {
+                if (d.type === "solid") {
+                    d3.select(this).append("circle")
+                        .attr("cx", 0)
+                        .attr("cy", 0)
+                        .attr("r", 8)
+                        .attr("fill", d.color);
+                } else {
+                    d3.select(this).append("line")
+                        .attr("x1", 0)
+                        .attr("y1", 0)
+                        .attr("x2", 16)
+                        .attr("y2", 0)
+                        .attr("stroke", d.color)
+                        .attr("stroke-width", 3)
+                        .attr("stroke-dasharray", "5,5");
+                }
+                d3.select(this).append("text")
+                    .attr("x", 25)
+                    .attr("y", 5)
+                    .text(d.label);
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkyBridge Alaska Coverage Map</title>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .map-container { width: 1000px; height: 700px; margin: 20px auto; border: 2px solid #333; }
+        .title { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+        .subtitle { text-align: center; font-size: 18px; color: #7f8c8d; margin-bottom: 30px; }
+        .legend { position: absolute; top: 10px; right: 10px; background: white; padding: 15px; border: 1px solid #ccc; border-radius: 5px; z-index: 1000; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+        .watermark { position: absolute; top: 10px; left: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; z-index: 1000; }
+        .coverage-stats { background: rgba(39, 174, 96, 0.1); padding: 20px; margin: 20px 0; border-radius: 10px; border: 2px solid #27ae60; }
+        .stat-item { display: inline-block; margin: 10px 20px; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #27ae60; }
+        .stat-label { font-size: 14px; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="watermark">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+    <div class="title">SkyBridge Alaska Coverage Concept</div>
+    <div class="subtitle">Community-Powered Mesh Network Coverage Areas</div>
+    
+    <div class="coverage-stats">
+        <div class="stat-item">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">Mile Range</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">$50</div>
+            <div class="stat-label">Per Node</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">80%</div>
+            <div class="stat-label">Data Compression</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">99%+</div>
+            <div class="stat-label">Uptime</div>
+        </div>
+    </div>
+    
+    <div class="map-container" id="map"></div>
+    <div class="legend">
+        <h4>Coverage Legend</h4>
+        <div style="color: #27ae60;">● SkyBridge Nodes (Active)</div>
+        <div style="color: #3498db;">● Coverage Areas (50+ mile radius)</div>
+        <div style="color: #f39c12;">● Major Airports</div>
+        <div style="color: #e74c3c;">● Current RCO Outages</div>
+        <div style="color: #9b59b6;">● DOT&PF Base Stations</div>
+    </div>
+    <div class="source">Source: SkyBridge Technical Specifications - NASA TAIGA Protocol Integration</div>
+
+    <script>
+        // Initialize map centered on Alaska
+        const map = L.map('map').setView([64.2008, -149.4937], 5);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // SkyBridge node locations (simulated)
+        const skybridgeNodes = [
+            {lat: 61.2181, lng: -149.9003, name: "Anchorage Hub"},
+            {lat: 60.7924, lng: -161.8758, name: "Bethel Regional"},
+            {lat: 64.8378, lng: -147.7164, name: "Fairbanks Hub"},
+            {lat: 58.3019, lng: -134.4197, name: "Juneau Gateway"},
+            {lat: 57.7900, lng: -152.4072, name: "Kodiak Island"},
+            {lat: 59.7559, lng: -161.8453, name: "Dillingham"},
+            {lat: 63.5888, lng: -154.4941, name: "McGrath"},
+            {lat: 66.5647, lng: -145.2739, name: "Fort Yukon"},
+            {lat: 62.4564, lng: -114.3525, name: "Nome"},
+            {lat: 60.1264, lng: -149.4183, name: "Seward"}
+        ];
+
+        // DOT&PF Base Stations
+        const dotpfBases = [
+            {lat: 61.1744, lng: -149.9963, name: "Anchorage FSS"},
+            {lat: 64.8151, lng: -147.8560, name: "Fairbanks FSS"},
+            {lat: 58.3544, lng: -134.5761, name: "Juneau FSS"}
+        ];
+
+        // Major airports
+        const majorAirports = [
+            {lat: 61.1744, lng: -149.9963, name: "Anchorage International"},
+            {lat: 64.8151, lng: -147.8560, name: "Fairbanks International"},
+            {lat: 58.3544, lng: -134.5761, name: "Juneau International"},
+            {lat: 60.7924, lng: -161.8758, name: "Bethel Airport"}
+        ];
+
+        // Current RCO outages (simulated)
+        const rcoOutages = [
+            {lat: 61.2181, lng: -149.9003, name: "Anchorage RCO"},
+            {lat: 60.7924, lng: -161.8758, name: "Bethel RCO"},
+            {lat: 64.8378, lng: -147.7164, name: "Fairbanks RCO"}
+        ];
+
+        // Add SkyBridge nodes (green)
+        skybridgeNodes.forEach(node => {
+            L.circleMarker([node.lat, node.lng], {
+                color: '#27ae60',
+                fillColor: '#27ae60',
+                fillOpacity: 0.8,
+                radius: 10
+            }).addTo(map).bindPopup(`<b>${node.name}</b><br>SkyBridge Node<br>50+ mile coverage`);
+            
+            // Add coverage circles
+            L.circle([node.lat, node.lng], {
+                color: '#27ae60',
+                fillColor: '#27ae60',
+                fillOpacity: 0.1,
+                radius: 50000 // 50 miles in meters
+            }).addTo(map);
+        });
+
+        // Add DOT&PF base stations (purple)
+        dotpfBases.forEach(base => {
+            L.circleMarker([base.lat, base.lng], {
+                color: '#9b59b6',
+                fillColor: '#9b59b6',
+                fillOpacity: 0.8,
+                radius: 12
+            }).addTo(map).bindPopup(`<b>${base.name}</b><br>DOT&PF Base Station`);
+        });
+
+        // Add major airports (orange)
+        majorAirports.forEach(airport => {
+            L.circleMarker([airport.lat, airport.lng], {
+                color: '#f39c12',
+                fillColor: '#f39c12',
+                fillOpacity: 0.8,
+                radius: 8
+            }).addTo(map).bindPopup(`<b>${airport.name}</b><br>Major Airport`);
+        });
+
+        // Add RCO outages (red)
+        rcoOutages.forEach(outage => {
+            L.circleMarker([outage.lat, outage.lng], {
+                color: '#e74c3c',
+                fillColor: '#e74c3c',
+                fillOpacity: 0.8,
+                radius: 6
+            }).addTo(map).bindPopup(`<b>${outage.name}</b><br>RCO Outage`);
+        });
+
+        // Add title overlay
+        L.control.textbox('SkyBridge Alaska: Community-Powered Aviation Safety', {
+            position: 'topleft',
+            style: {
+                'background-color': 'rgba(255,255,255,0.9)',
+                'padding': '15px',
+                'border-radius': '5px',
+                'font-weight': 'bold',
+                'color': '#2c3e50',
+                'font-size': '16px'
+            }
+        }).addTo(map);
+    </script>
+</body>
+</html>

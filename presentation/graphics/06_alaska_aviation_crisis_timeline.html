@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alaska Aviation Crisis Timeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .chart-container { width: 1000px; height: 500px; margin: 20px auto; }
+        .title { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+        .subtitle { text-align: center; font-size: 18px; color: #7f8c8d; margin-bottom: 30px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+        .watermark { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        .timeline-item { background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #e74c3c; border-radius: 5px; }
+        .year { font-weight: bold; color: #e74c3c; font-size: 18px; }
+        .event { margin: 5px 0; }
+        .impact { color: #c0392b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="watermark">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+    <div class="title">Alaska Aviation Crisis Timeline</div>
+    <div class="subtitle">Decades of Infrastructure Failures and Safety Incidents</div>
+    
+    <div class="chart-container">
+        <canvas id="timelineChart"></canvas>
+    </div>
+    
+    <div class="timeline-item">
+        <div class="year">2008-2023</div>
+        <div class="event">15 CFIT (Controlled Flight Into Terrain) crashes</div>
+        <div class="event impact">16 fatalities, 7 seriously injured</div>
+    </div>
+    
+    <div class="timeline-item">
+        <div class="year">2014</div>
+        <div class="event">Washington Post investigation: "Mars is better mapped than Alaska"</div>
+        <div class="event impact">$30 million needed just to finish mapping Alaska</div>
+    </div>
+    
+    <div class="timeline-item">
+        <div class="year">2017</div>
+        <div class="event">RTCA Technical Operations Committee identifies 21 airports needing AWOS</div>
+        <div class="event impact">Only 23 of 92 recommendations applied to Alaska</div>
+    </div>
+    
+    <div class="timeline-item">
+        <div class="year">2020</div>
+        <div class="event">NTSB Safety Recommendation Report issued</div>
+        <div class="event impact">Roundtable participants noted stalled progress on safety enhancements</div>
+    </div>
+    
+    <div class="timeline-item">
+        <div class="year">2023</div>
+        <div class="event">29 RCO sites with unscheduled outages (June)</div>
+        <div class="event impact">&lt;30% ADS-B equipage despite federal investment</div>
+    </div>
+    
+    <div class="source">Sources: Washington Post (2014), NTSB (2020), Alaska DOT&PF Gap Analysis (2023)</div>
+
+    <script>
+        const ctx = document.getElementById('timelineChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['2008', '2010', '2012', '2014', '2016', '2018', '2020', '2022', '2023'],
+                datasets: [{
+                    label: 'CFIT Crashes (Cumulative)',
+                    data: [1, 2, 3, 5, 7, 9, 11, 13, 15],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Fatalities (Cumulative)',
+                    data: [1, 2, 4, 6, 8, 10, 12, 14, 16],
+                    borderColor: '#c0392b',
+                    backgroundColor: 'rgba(192, 57, 43, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'RCO Outages (Annual)',
+                    data: [5, 8, 12, 15, 18, 22, 25, 27, 29],
+                    borderColor: '#f39c12',
+                    backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Alaska Aviation Infrastructure Crisis - 15 Year Trend',
+                        font: { size: 20, weight: 'bold' }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Incidents'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Year'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
