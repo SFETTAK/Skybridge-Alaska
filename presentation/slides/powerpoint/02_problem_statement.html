@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Problem Statement - Alaska Aviation Crisis</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #2c3e50;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .slide-container {
+            width: 90%;
+            max-width: 1200px;
+            padding: 40px;
+        }
+        .slide-title {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #e74c3c;
+        }
+        .crisis-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .stat-box {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .stat-description {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .quote-box {
+            background: rgba(52, 73, 94, 0.8);
+            border-left: 5px solid #f39c12;
+            padding: 30px;
+            margin: 30px 0;
+            font-size: 20px;
+            font-style: italic;
+        }
+        .quote-source {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        .infrastructure-failures {
+            background: rgba(52, 73, 94, 0.6);
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .failure-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .failure-item {
+            background: rgba(231, 76, 60, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+    <div class="slide-container">
+        <div class="slide-title">The Alaska Aviation Crisis</div>
+        
+        <div class="crisis-stats">
+            <div class="stat-box">
+                <div class="stat-number">36x</div>
+                <div class="stat-label">Higher Fatality Rate</div>
+                <div class="stat-description">Alaska pilots vs. average U.S. worker</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">15</div>
+                <div class="stat-label">CFIT Crashes</div>
+                <div class="stat-description">Since 2008 (16 dead, 7 injured)</div>
+            </div>
+        </div>
+
+        <div class="quote-box">
+            "Mars is better mapped than the state of Alaska"
+            <div class="quote-source">- Steve Colligan, E-Terra Aviation Safety (Washington Post, 2014)</div>
+        </div>
+
+        <div class="infrastructure-failures">
+            <h3 style="margin-top: 0; color: #f39c12;">Infrastructure Failures (June 2023)</h3>
+            <div class="failure-list">
+                <div class="failure-item">29 RCO sites with unscheduled outages</div>
+                <div class="failure-item">&lt;30% ADS-B equipage (target was 90%)</div>
+                <div class="failure-item">171 NOTAMs within 100 miles of Anchorage</div>
+                <div class="failure-item">$350K+ per traditional weather radar unit</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

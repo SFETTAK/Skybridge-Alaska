@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alaska RCO Outages and Infrastructure Failures</title>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .map-container { width: 900px; height: 600px; margin: 20px auto; border: 2px solid #333; }
+        .title { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+        .subtitle { text-align: center; font-size: 16px; color: #666; margin-bottom: 30px; }
+        .legend { position: absolute; top: 10px; right: 10px; background: white; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="title">Alaska Aviation Infrastructure Crisis</div>
+    <div class="subtitle">29 RCO Sites with Unscheduled Outages (June 2023)</div>
+    <div class="map-container" id="map"></div>
+    <div class="legend">
+        <h4>Legend</h4>
+        <div style="color: #e74c3c;">● RCO Outages (29 sites)</div>
+        <div style="color: #f39c12;">● Coverage Gaps</div>
+        <div style="color: #27ae60;">● Operational Sites</div>
+        <div style="color: #3498db;">● Major Airports</div>
+    </div>
+    <div class="source">Source: Alaska DOT&PF Gap Analysis - Infrastructure failures impact pilot safety daily</div>
+    <div style="position: absolute; top: 10px; left: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px;">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+
+    <script>
+        // Initialize map centered on Alaska
+        const map = L.map('map').setView([64.2008, -149.4937], 5);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Sample RCO outage locations (approximate coordinates)
+        const rcoOutages = [
+            {lat: 61.2181, lng: -149.9003, name: "Anchorage RCO"},
+            {lat: 60.7924, lng: -161.8758, name: "Bethel RCO"},
+            {lat: 64.8378, lng: -147.7164, name: "Fairbanks RCO"},
+            {lat: 58.3019, lng: -134.4197, name: "Juneau RCO"},
+            {lat: 57.7900, lng: -152.4072, name: "Kodiak RCO"},
+            {lat: 59.7559, lng: -161.8453, name: "Dillingham RCO"},
+            {lat: 63.5888, lng: -154.4941, name: "McGrath RCO"},
+            {lat: 66.5647, lng: -145.2739, name: "Fort Yukon RCO"},
+            {lat: 62.4564, lng: -114.3525, name: "Nome RCO"},
+            {lat: 60.1264, lng: -149.4183, name: "Seward RCO"}
+        ];
+
+        // Sample coverage gap areas
+        const coverageGaps = [
+            {lat: 65.5, lng: -150.0, name: "Interior Alaska Gap"},
+            {lat: 63.0, lng: -160.0, name: "Western Alaska Gap"},
+            {lat: 59.0, lng: -140.0, name: "Southeast Alaska Gap"},
+            {lat: 67.0, lng: -160.0, name: "North Slope Gap"}
+        ];
+
+        // Major airports
+        const majorAirports = [
+            {lat: 61.1744, lng: -149.9963, name: "Anchorage International"},
+            {lat: 64.8151, lng: -147.8560, name: "Fairbanks International"},
+            {lat: 58.3544, lng: -134.5761, name: "Juneau International"}
+        ];
+
+        // Add RCO outage markers (red)
+        rcoOutages.forEach(site => {
+            L.circleMarker([site.lat, site.lng], {
+                color: '#e74c3c',
+                fillColor: '#e74c3c',
+                fillOpacity: 0.8,
+                radius: 8
+            }).addTo(map).bindPopup(`<b>${site.name}</b><br>RCO Outage`);
+        });
+
+        // Add coverage gap markers (orange)
+        coverageGaps.forEach(gap => {
+            L.circleMarker([gap.lat, gap.lng], {
+                color: '#f39c12',
+                fillColor: '#f39c12',
+                fillOpacity: 0.6,
+                radius: 12
+            }).addTo(map).bindPopup(`<b>${gap.name}</b><br>Coverage Gap`);
+        });
+
+        // Add major airport markers (blue)
+        majorAirports.forEach(airport => {
+            L.circleMarker([airport.lat, airport.lng], {
+                color: '#3498db',
+                fillColor: '#3498db',
+                fillOpacity: 0.8,
+                radius: 10
+            }).addTo(map).bindPopup(`<b>${airport.name}</b><br>Major Airport`);
+        });
+
+        // Add title overlay
+        L.control.textbox('29 RCO Outages Impacting Pilot Safety', {
+            position: 'topleft',
+            style: {
+                'background-color': 'rgba(255,255,255,0.8)',
+                'padding': '10px',
+                'border-radius': '5px',
+                'font-weight': 'bold',
+                'color': '#e74c3c'
+            }
+        }).addTo(map);
+    </script>
+</body>
+</html>

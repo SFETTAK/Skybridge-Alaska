@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkyBridge Alaska System Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .diagram-container { width: 1000px; height: 600px; margin: 20px auto; border: 2px solid #333; }
+        .title { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+        .subtitle { text-align: center; font-size: 16px; color: #666; margin-bottom: 30px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+        .node { fill: #3498db; stroke: #2980b9; stroke-width: 2px; }
+        .aircraft { fill: #e74c3c; stroke: #c0392b; stroke-width: 2px; }
+        .gateway { fill: #27ae60; stroke: #229954; stroke-width: 2px; }
+        .base-station { fill: #f39c12; stroke: #e67e22; stroke-width: 2px; }
+        .connection { stroke: #34495e; stroke-width: 2px; fill: none; }
+        .label { font-size: 12px; font-weight: bold; text-anchor: middle; }
+    </style>
+</head>
+<body>
+    <div class="title">SkyBridge Alaska System Architecture</div>
+    <div class="subtitle">Community-Powered Mesh Network with Alaska DOT&PF Integration</div>
+    <div class="diagram-container" id="diagram"></div>
+    <div class="source">Source: SkyBridge Technical Architecture - NASA TAIGA Protocol Integration</div>
+    <div style="position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px;">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+
+    <script>
+        const width = 1000;
+        const height = 600;
+        const svg = d3.select("#diagram")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Define system components
+        const components = [
+            {id: "aircraft1", x: 100, y: 100, type: "aircraft", label: "Aircraft 1"},
+            {id: "aircraft2", x: 200, y: 150, type: "aircraft", label: "Aircraft 2"},
+            {id: "aircraft3", x: 300, y: 80, type: "aircraft", label: "Aircraft 3"},
+            {id: "node1", x: 150, y: 250, type: "node", label: "Mesh Node 1"},
+            {id: "node2", x: 250, y: 300, type: "node", label: "Mesh Node 2"},
+            {id: "node3", x: 350, y: 200, type: "node", label: "Mesh Node 3"},
+            {id: "gateway", x: 500, y: 300, type: "gateway", label: "Gateway"},
+            {id: "base1", x: 700, y: 200, type: "base-station", label: "DOT&PF Base"},
+            {id: "base2", x: 800, y: 300, type: "base-station", label: "FSS Station"},
+            {id: "internet", x: 600, y: 100, type: "node", label: "Internet"}
+        ];
+
+        // Define connections
+        const connections = [
+            {source: "aircraft1", target: "node1"},
+            {source: "aircraft2", target: "node1"},
+            {source: "aircraft2", target: "node2"},
+            {source: "aircraft3", target: "node3"},
+            {source: "node1", target: "node2"},
+            {source: "node2", target: "node3"},
+            {source: "node1", target: "gateway"},
+            {source: "node2", target: "gateway"},
+            {source: "node3", target: "gateway"},
+            {source: "gateway", target: "internet"},
+            {source: "gateway", target: "base1"},
+            {source: "gateway", target: "base2"},
+            {source: "internet", target: "base1"},
+            {source: "internet", target: "base2"}
+        ];
+
+        // Draw connections
+        svg.selectAll(".connection")
+            .data(connections)
+            .enter()
+            .append("line")
+            .attr("class", "connection")
+            .attr("x1", d => components.find(c => c.id === d.source).x)
+            .attr("y1", d => components.find(c => c.id === d.source).y)
+            .attr("x2", d => components.find(c => c.id === d.target).x)
+            .attr("y2", d => components.find(c => c.id === d.target).y);
+
+        // Draw components
+        svg.selectAll(".component")
+            .data(components)
+            .enter()
+            .append("circle")
+            .attr("class", d => d.type)
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y)
+            .attr("r", d => d.type === "aircraft" ? 15 : d.type === "gateway" ? 20 : 12);
+
+        // Add labels
+        svg.selectAll(".label")
+            .data(components)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", d => d.x)
+            .attr("y", d => d.y + 30)
+            .text(d => d.label);
+
+        // Add title
+        svg.append("text")
+            .attr("x", width/2)
+            .attr("y", 30)
+            .attr("class", "label")
+            .style("font-size", "16px")
+            .style("font-weight", "bold")
+            .text("50+ Mile Range • 80% Data Compression • $50 Per Node");
+
+        // Add legend
+        const legend = svg.append("g")
+            .attr("transform", "translate(50, 450)");
+
+        const legendItems = [
+            {color: "#e74c3c", label: "Aircraft"},
+            {color: "#3498db", label: "Mesh Nodes"},
+            {color: "#27ae60", label: "Gateway"},
+            {color: "#f39c12", label: "DOT&PF Base"}
+        ];
+
+        legend.selectAll(".legend-item")
+            .data(legendItems)
+            .enter()
+            .append("g")
+            .attr("class", "legend-item")
+            .attr("transform", (d, i) => `translate(0, ${i * 25})`)
+            .each(function(d) {
+                d3.select(this).append("circle")
+                    .attr("cx", 0)
+                    .attr("cy", 0)
+                    .attr("r", 8)
+                    .attr("fill", d.color);
+                d3.select(this).append("text")
+                    .attr("x", 20)
+                    .attr("y", 5)
+                    .text(d.label);
+            });
+    </script>
+</body>
+</html>

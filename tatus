@@ -1,0 +1,204 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex e4a6a5e..0e9f48f 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -1,53 +1,108 @@[m
+[31m-# Private documents and sensitive files[m
+[32m+[m[32m# SkyBridge Alaska - Git Ignore File[m
+[32m+[m
+[32m+[m[32m# Private and sensitive content[m
+ PRIVATE/[m
+[32m+[m[32m*.private[m
+[32m+[m[32m*_PRIVATE.*[m
+[32m+[m[32m*PRIVATE*[m
+[32m+[m
+[32m+[m[32m# SSH Keys and sensitive files[m
+ *.key[m
+[31m-*.pem[m
+[31m-*.pub[m
+[32m+[m[32m*key[m
+ skybridge[m
+[31m-NASAO_STRATEGY_PRIVATE.md[m
+[32m+[m[32mskybridge.pub[m
+[32m+[m[32mid_*[m
+[32m+[m[32m*.pem[m
+ [m
+[31m-# Dependencies[m
+[31m-node_modules/[m
+[31m-*.pyc[m
+[31m-__pycache__/[m
+[31m-.env[m
+[31m-.env.local[m
+[32m+[m[32m# Patent and legal documents[m
+[32m+[m[32m*.patent[m
+[32m+[m[32m*Patent*[m
+[32m+[m[32m*patent*[m
+[32m+[m
+[32m+[m[32m# Personal strategy documents[m
+[32m+[m[32m*STRATEGY*[m
+[32m+[m[32m*strategy*[m
+ [m
+[31m-# Build outputs[m
+[32m+[m[32m# Build artifacts[m
+ build/[m
+ dist/[m
+[31m-*.hex[m
+[31m-*.bin[m
+[31m-*.uf2[m
+[32m+[m[32m*.o[m
+[32m+[m[32m*.so[m
+[32m+[m[32m*.dll[m
+[32m+[m[32m*.exe[m
+[32m+[m[32m*.app[m
+ [m
+[31m-# IDE files[m
+[32m+[m[32m# IDE and editor files[m
+ .vscode/[m
+ .idea/[m
+ *.swp[m
+ *.swo[m
+ *~[m
+[31m-[m
+[31m-# OS files[m
+ .DS_Store[m
+ Thumbs.db[m
+ [m
+[31m-# Credentials and secrets[m
+[31m-credentials.json[m
+[31m-secrets.yaml[m
+[32m+[m[32m# Node.js dependencies[m
+[32m+[m[32mnode_modules/[m
+[32m+[m[32mnpm-debug.log*[m
+[32m+[m[32myarn-debug.log*[m
+[32m+[m[32myarn-error.log*[m
+[32m+[m
+[32m+[m[32m# Python[m
+[32m+[m[32m__pycache__/[m
+[32m+[m[32m*.py[cod][m
+[32m+[m[32m*$py.class[m
+[32m+[m[32m*.egg-info/[m
+[32m+[m[32m.pytest_cache/[m
+ [m
+[31m-# Logs[m
+[32m+[m[32m# Firmware build files[m
+[32m+[m[32m*.bin[m
+[32m+[m[32m*.hex[m
+[32m+[m[32m*.elf[m
+[32m+[m[32m*.map[m
+[32m+[m
+[32m+[m[32m# Hardware design files (keep source, ignore generated)[m
+[32m+[m[32m*.bak[m
+[32m+[m[32m*.kicad_pcb-bak[m
+[32m+[m[32m*.sch-bak[m
+[32m+[m
+[32m+[m[32m# Documentation builds[m
+[32m+[m[32mdocs/_build/[m
+[32m+[m[32m*.pdf.tmp[m
+[32m+[m
+[32m+[m[32m# Temporary files[m
+[32m+[m[32m*.tmp[m
+[32m+[m[32m*.temp[m
+[32m+[m[32mtemp/[m
+[32m+[m[32mtmp/[m
+[32m+[m
+[32m+[m[32m# Log files[m
+ *.log[m
+ logs/[m
+ [m
+[31m-# Documentation build[m
+[31m-docs/_build/[m
+[31m-*.pdf[m
+[32m+[m[32m# Environment files[m
+[32m+[m[32m.env[m
+[32m+[m[32m.env.local[m
+[32m+[m[32m.env.*.local[m
+[32m+[m
+[32m+[m[32m# Database files[m
+[32m+[m[32m*.db[m
+[32m+[m[32m*.sqlite[m
+[32m+[m[32m*.sqlite3[m
+ [m
+[31m-# Hardware design files (temporarily)[m
+[32m+[m[32m# Backup files[m
+[32m+[m[32m*.backup[m
+ *.bak[m
+[31m-*.kicad_pcb-bak[m
+[32m+[m[32m*~[m
+ [m
+[31m-# Test files[m
+[31m-test_data/[m
+[31m-coverage/[m
+[31m-.pytest_cache/[m
+[32m+[m[32m# Archive files (unless specifically needed)[m
+[32m+[m[32m*.zip[m
+[32m+[m[32m*.tar.gz[m
+[32m+[m[32m*.rar[m
+[32m+[m[32m*.7z[m
+[32m+[m
+[32m+[m[32m# Large binary files (link to releases instead)[m
+[32m+[m[32m*.iso[m
+[32m+[m[32m*.dmg[m
+[32m+[m[32m*.pkg[m
+[32m+[m[32m*.deb[m
+[32m+[m[32m*.rpm[m
+\ No newline at end of file[m
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 746a65f..a02e362 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -12,7 +12,9 @@[m
+ [m
+ **You pay once, use forever.** $50 for the [Meshtastic](https://meshtastic.org) radio, then you're done. No monthly subscriptions, no satellite fees, no corporate overlords bleeding you dry. Your radio, your network, your control.[m
+ [m
+[31m-**[Get Started with SkyBridge →](docs/pilot_benefits.md)**[m
+[32m+[m[32m**You control what you share.** Share your location if you want, keep it private if you don't. Share weather reports to help other pilots, or just receive information. The network works for you, not against you.[m
+[32m+[m
+[32m+[m[32m**Your network gets stronger with more pilots.** Every pilot who joins makes coverage better for everyone. More reliability, more safety, more information. You're not just buying a radio, you're joining a community that has each other's backs.[m
+ [m
+ ---[m
+ [m
+[36m@@ -24,7 +26,7 @@[m
+ [m
+ ### The Crisis Behind the Solution[m
+ [m
+[31m-Alaska pilots are 36 times more likely to die than the average US worker according to the CDC. Terrain maps contain significant errors, with large mapping discrepancies documented in The Washington Post investigation contributing to fatal crashes. Multiple "controlled flight into terrain" crashes have occurred since 2008 according to NTSB data.[m
+[32m+[m[32mAlaska pilots are 36 times more likely to die than the average US worker according to the CDC. Terrain maps contain errors up to 263 feet, directly contributing to fatal crashes as documented in The Washington Post investigation. Since 2008, 15 "controlled flight into terrain" crashes have killed 16 people and left 7 seriously injured according to NTSB data.[m
+ [m
+ The problem is infrastructure: no reliable weather or NOTAM updates in remote areas covering 80% of Alaska. Government mapping solutions remain stuck in budget gridlock, with $30 million needed just to finish mapping Alaska. As aviation safety expert Steve Colligan noted, "Mars is better mapped than the state of Alaska."[m
+ [m
+[36m@@ -46,10 +48,10 @@[m [mSkyBridge is a **mobile app and web platform** for Alaska aviation services that[m
+ [m
+ **Operational prototypes** - Working Meshtastic devices deployed and tested with pilots  [m
+ **Active expansion** - Alaska DOT&PF pilot program scaling statewide  [m
+[31m-**Patent applications** - Provisional applications submitted (September 2024); assignment to State of Alaska planned  [m
+[31m-**Industry partnerships** - In discussions and testing with Meshtastic and Rokland Technologies  [m
+[32m+[m[32m**Patent protection** - Three provisional patents filed protecting core innovations[m[41m  [m
+[32m+[m[32m**Industry partnerships** - Active collaboration with Meshtastic and Rokland Technologies[m[41m  [m
+ **Multi-state interest** - Ready for coordinated deployment nationwide  [m
+[31m-**IP development** - Provisional applications enable future commercial partnerships  [m
+[32m+[m[32m**IP protection** - State-owned patents enable confident commercial partnerships[m[41m  [m
+ [m
+ ![Network Topology](docs/network.jpg)[m
+ [m
+[36m@@ -82,8 +84,8 @@[m [mSee [LICENSE.md](LICENSE.md) for complete terms.[m
+ [m
+ **Why SkyBridge Matters to Your State:**[m
+ - **Rural aviation challenges aren't unique to Alaska** - Montana, Idaho, Wyoming, Colorado face similar terrain and weather risks[m
+[31m-- **$50 nodes vs $200K ground stations** - Economically viable for rural airports and pilot communities (typical AWOS/RCAG build costs vary widely)  [m
+[31m-- **State control, not federal dependency** - Community-operated infrastructure under state oversight, building on FAA Capstone program heritage[m
+[32m+[m[32m- **$50 nodes vs $200K ground stations** - Economically viable for rural airports and pilot communities[m[41m  [m
+[32m+[m[32m- **State control, not federal dependency** - Community-operated infrastructure under state oversight[m
+ - **Revenue potential** - Commercial licensing funds ongoing development while keeping core system open source[m
+ - **Interstate cooperation** - Shared development costs, shared safety benefits[m
+ [m
+[36m@@ -95,27 +97,24 @@[m [mSee [LICENSE.md](LICENSE.md) for complete terms.[m
+ [m
+ **Ready for Multi-State Pilot Program**[m
+ - Working [Meshtastic](https://meshtastic.org) prototypes deployed and tested[m
+[31m-- NASA TAIGA protocol integration demonstrated[m
+[32m+[m[32m- NASA TAIGA protocol integration proven[m
+ - Alaska DOT&PF partnership established[m
+ - Seeking 3-5 additional states for coordinated deployment[m
+ [m
+[31m-### Key Documentation[m
+[32m+[m[32m### Technical Resourc

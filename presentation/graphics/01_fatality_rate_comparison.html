@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alaska Aviation Fatality Rate Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .chart-container { width: 800px; height: 400px; margin: 20px auto; }
+        .title { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+        .subtitle { text-align: center; font-size: 16px; color: #666; margin-bottom: 30px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="title">Alaska Aviation Safety Crisis</div>
+    <div class="subtitle">Pilot Fatality Rate Comparison</div>
+    <div class="chart-container">
+        <canvas id="fatalityChart"></canvas>
+    </div>
+    <div class="source">Source: CDC Data - Alaska pilots are 36 times more likely to die than average U.S. worker</div>
+    <div style="position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px;">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+
+    <script>
+        const ctx = document.getElementById('fatalityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Average U.S. Worker', 'Alaska Pilots'],
+                datasets: [{
+                    label: 'Fatality Rate (per 100,000)',
+                    data: [1, 36],
+                    backgroundColor: ['#3498db', '#e74c3c'],
+                    borderColor: ['#2980b9', '#c0392b'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '36x Higher Fatality Rate',
+                        font: { size: 20, weight: 'bold' }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Fatality Rate (per 100,000 workers)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Worker Category'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

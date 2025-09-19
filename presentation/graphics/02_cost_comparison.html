@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkyBridge vs Traditional Infrastructure Cost Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: white; }
+        .chart-container { width: 800px; height: 400px; margin: 20px auto; }
+        .title { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+        .subtitle { text-align: center; font-size: 16px; color: #666; margin-bottom: 30px; }
+        .source { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
+        .highlight { background: #f39c12; color: white; padding: 5px 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="title">Infrastructure Cost Revolution</div>
+    <div class="subtitle">SkyBridge vs Traditional FAA Infrastructure</div>
+    <div class="chart-container">
+        <canvas id="costChart"></canvas>
+    </div>
+    <div class="source">Source: Alaska DOT&PF Analysis - 10x to 50x cost advantage over traditional infrastructure</div>
+    <div style="position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px;">SIMULATED DATA - FOR DEMONSTRATION ONLY</div>
+
+    <script>
+        const ctx = document.getElementById('costChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['SkyBridge Node', 'Traditional Ground Station', 'Weather Radar Unit', 'RCO Site'],
+                datasets: [{
+                    label: 'Cost ($)',
+                    data: [50, 200000, 350000, 500000],
+                    backgroundColor: ['#27ae60', '#e74c3c', '#e74c3c', '#e74c3c'],
+                    borderColor: ['#229954', '#c0392b', '#c0392b', '#c0392b'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Revolutionary Cost Advantage',
+                        font: { size: 20, weight: 'bold' }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cost (Log Scale)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Infrastructure Type'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
