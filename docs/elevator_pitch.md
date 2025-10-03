@@ -1,14 +1,14 @@
 # SkyBridge Alaska - Elevator Pitch for NASAO 2025
 
 ## 30-Second Version - The Raw Syrup
-*"Every pilot has missed that ONE critical radio call. SkyBridge solves this forever - Alaska DOT base stations capture EVERY VHF transmission, convert to text, and share via $50 mesh radios. **All of this on your phone or tablet** - get all aviation data anywhere in the sky with NO subscriptions, NO tracking, NO corporate overlords. You control what you share, but get everything you need. The more pilots join, the safer it gets. Alaska is deploying it now."*
+*"We're not building emergency response infrastructure - we're building emergency PREVENTION infrastructure. SkyBridge prevents accidents before they happen, not just responds after. Alaska DOT base stations capture EVERY VHF transmission, convert to text, and share via $50 mesh radios. **All of this on your phone or tablet** - get all aviation data anywhere in the sky with NO subscriptions, NO tracking, NO corporate overlords. Flight Services can watch the entire network with professional oversight. The more pilots join, the safer it gets. Alaska is deploying it now."*
 
 ## 60-Second Version (With Washington Post Credibility)
 *"The Washington Post investigated Alaska's aviation crisis and found that Mars is literally better mapped than Alaska. Terrain mapping errors of 263+ feet are killing pilots - like Alex Stack and Aric Beane, who died when their GPS showed a ridge 263 feet lower than reality.*
 
-*Government solutions are stuck in budget gridlock - $30 million just to finish mapping Alaska. We built a different approach: $50 mesh radios using NASA's TAIGA protocol that let pilots share real-time weather, terrain warnings, and emergency beacons peer-to-peer.*
+*Government solutions are stuck in budget gridlock - $30 million just to finish mapping Alaska. We built a different approach: $50 mesh radios using NASA's TAIGA protocol that let pilots share real-time weather, terrain warnings, and emergency beacons peer-to-peer. Flight Services can monitor the entire network with professional oversight.*
 
-*Alaska DOT is piloting it now. Montana, Idaho, Wyoming - you have the same terrain challenges. Same pilot fatality rates. This works without federal dependency, without recurring costs, and it's ready for multi-state deployment."*
+*This isn't emergency response infrastructure - it's emergency PREVENTION infrastructure. It prevents accidents before they happen, not just responds after. Alaska DOT is piloting it now. Montana, Idaho, Wyoming - you have the same terrain challenges. Same pilot fatality rates. This works without federal dependency, without recurring costs, and it's ready for multi-state deployment."*
 
 ## Key Statistics to Memorize
 - **36x** - Alaska pilot fatality rate vs. average US worker

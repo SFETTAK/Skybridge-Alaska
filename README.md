@@ -2,9 +2,9 @@
 ## Aviation Safety Mesh Network
 *Saving Lives Through Community-Powered Infrastructure*
 
-![Aviation Mesh Network](docs/SDR-Mesh-GeneralAviation.png)
+---
 
-## For Pilots
+## 🎯 For Pilots: What's In It For YOU
 
 **Never miss critical radio calls again.** You know that sinking feeling when you realize you missed THE critical weather report or traffic advisory that was said once when you were out of range. With SkyBridge, Alaska DOT&PF base stations capture every VHF transmission and send it to your phone as text. You'll always know what was said.
 
@@ -16,13 +16,32 @@
 
 **Your network gets stronger with more pilots.** Every pilot who joins makes coverage better for everyone. More reliability, more safety, more information. You're not just buying a radio, you're joining a community that has each other's backs.
 
+![Aviation Mesh Network](docs/SDR-Mesh-GeneralAviation.png)
+
+---
+
+## State Infrastructure Integration
+
+**SkyBridge is designed to integrate with Alaska DOT&PF's existing aviation infrastructure deployment.**
+
+The project leverages existing state investments in remote site connectivity, power infrastructure, and aviation communications systems. By adding low-cost mesh networking nodes to existing facilities, SkyBridge creates a statewide pilot communications network at minimal incremental cost.
+
+**Integration Approach:**
+- Deploy mesh nodes at existing DOT&PF aviation facilities
+- Leverage existing power and internet connectivity infrastructure
+- Coordinate with tribal partnerships in remote communities
+- Align with workforce development and training programs
+- Support proof-of-concept deployments in key locations
+
+**Strategic Value:** Low-cost enhancement to existing infrastructure that provides daily value to pilots through improved communications and safety awareness.
+
 ---
 
 ## The Problem We're Solving
 
 **The aviation crisis is real and deadly:** As [The Washington Post](https://www.adn.com/aviation/article/alaska-s-outdated-maps-make-flying-peril-high-tech-fix-gaining-ground/2014/10/15/) reported, terrain mapping errors of 263+ feet contributed to fatal crashes, with one expert noting *"Mars is better mapped than the state of Alaska."* Traditional government solutions remain stuck in budget gridlock after decades.
 
-**SkyBridge is the breakthrough:** A $50 peer-to-peer solution that bypasses failed government infrastructure.
+**SkyBridge is the breakthrough:** We're not building emergency response infrastructure - we're building **emergency PREVENTION infrastructure**. A $50 peer-to-peer solution that prevents accidents before they happen, not just responds to them after.
 
 ### The Crisis Behind the Solution
 
@@ -83,7 +102,9 @@ See [LICENSE.md](LICENSE.md) for complete terms.
 ### For State Aviation Officials
 
 **Why SkyBridge Matters to Your State:**
-- **Rural aviation challenges aren't unique to Alaska** - Montana, Idaho, Wyoming, Colorado face similar terrain and weather risks
+- **Prevention infrastructure, not response infrastructure** - Prevents accidents before they happen, not just responds after
+- **Always-on value, not emergency-only** - Provides daily operational value every flight, not just during disasters
+- **Flight Services integration** - Professional oversight with network-wide visibility and proactive safety management
 - **$50 nodes vs $200K ground stations** - Economically viable for rural airports and pilot communities  
 - **State control, not federal dependency** - Community-operated infrastructure under state oversight
 - **Revenue potential** - Commercial licensing funds ongoing development while keeping core system open source

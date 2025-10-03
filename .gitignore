@@ -13,6 +13,8 @@ skybridge
 skybridge.pub
 id_*
 *.pem
+*_admin_credentials.md
+*_credentials.md
 
 # Patent and legal documents
 *.patent
@@ -106,3 +108,12 @@ logs/
 *.pkg
 *.deb
 *.rpm
+
+# VRS telemetry exploration directory
+telemetry_vrs/
+
+# Advanced features and future development
+BlockChain/
+
+# Development journal and notes
+JOURNAL.md

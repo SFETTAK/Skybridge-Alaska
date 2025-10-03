@@ -143,7 +143,7 @@
 ## Slide 6: The SkyBridge Solution
 
 ### Content
-**We built a $50 solution to a $200K problem**
+**We're not building emergency response infrastructure - we're building emergency PREVENTION infrastructure**
 
 **Technology:**
 - **NASA TAIGA protocol** for data compression
@@ -152,6 +152,9 @@
 - **Mobile app interface** for iOS/Android
 
 **Key Features:**
+- ✅ **Prevents accidents before they happen** - not just responds after
+- ✅ **Always-on value** - provides daily operational value every flight
+- ✅ **Flight Services integration** - professional oversight with network-wide visibility
 - ✅ **Works anywhere** - no cell towers or satellites required
 - ✅ **Community-powered** - gets stronger with each pilot
 - ✅ **No recurring fees** - $50 one-time cost

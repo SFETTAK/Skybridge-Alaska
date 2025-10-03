@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyBridge Alaska - Network Flow Map</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        
+        #network {
+            width: 100%;
+            height: 900px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f7fafc;
+        }
+        
+        .node-label {
+            font-size: 12px;
+            font-weight: 600;
+            fill: #2d3748;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        
+        .node-sublabel {
+            font-size: 10px;
+            fill: #718096;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        
+        .link {
+            stroke-width: 2;
+            fill: none;
+            opacity: 0.6;
+        }
+        
+        .link-label {
+            font-size: 10px;
+            fill: #4a5568;
+            text-anchor: middle;
+            pointer-events: none;
+            background: white;
+        }
+        
+        .node {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            filter: brightness(1.2);
+        }
+        
+        .legend {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-panel {
+            background: #edf2f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .info-panel h3 {
+            margin-top: 0;
+            color: #2d3748;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 300px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛩️ SkyBridge Alaska Network Flow Map</h1>
+        <p class="subtitle">Aviation Safety Mesh Network Architecture</p>
+        
+        <div id="network"></div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background: #4299e1;"></div>
+                <span>Aircraft Nodes</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #48bb78;"></div>
+                <span>Ground Stations</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #ed8936;"></div>
+                <span>Cloud Infrastructure</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #9f7aea;"></div>
+                <span>External Services</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #f56565;"></div>
+                <span>Mobile Apps</span>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h3>Network Components:</h3>
+            <ul>
+                <li><strong>Aircraft Nodes:</strong> RAK4631 LoRa radios with GPS, weather sensors, and aircraft power integration ($50-100 per node)</li>
+                <li><strong>Ground Stations:</strong> Raspberry Pi + LoRa with internet gateway, weather stations, and VHF SDR transcription ($425-545 per station)</li>
+                <li><strong>LoRa Mesh:</strong> 902-928 MHz ISM band, 50+ mile range at altitude, store-and-forward capability</li>
+                <li><strong>MQTT Broker:</strong> Central telemetry collection, node monitoring, and data distribution hub</li>
+                <li><strong>Weather Integration:</strong> NOAA, NWS, FAA NOTAM feeds encoded with NASA TAIGA ASN.1 protocol</li>
+                <li><strong>Mobile Apps:</strong> iOS/Android React Native apps with offline-first architecture</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script>
+        const width = document.getElementById('network').offsetWidth;
+        const height = 900;
+        
+        // Define nodes with detailed information
+        const nodes = [
+            // Aircraft Layer
+            { id: 'aircraft1', label: 'Aircraft 1', sublabel: 'In Flight', type: 'aircraft', x: 200, y: 100, info: 'RAK4631 node with GPS, weather sensors, 50+ mile range' },
+            { id: 'aircraft2', label: 'Aircraft 2', sublabel: 'In Flight', type: 'aircraft', x: 400, y: 120, info: 'Peer relay node, store-and-forward messages' },
+            { id: 'aircraft3', label: 'Aircraft 3', sublabel: 'In Flight', type: 'aircraft', x: 600, y: 80, info: 'Mobile mesh participant, PIREPs, location sharing' },
+            
+            // Ground Stations
+            { id: 'ground1', label: 'Ground Station', sublabel: 'AAA Nenana', type: 'ground', x: 300, y: 300, info: 'Fixed node at Alaska Airmen Association, Raspberry Pi + LoRa' },
+            { id: 'ground2', label: 'Ground Station', sublabel: 'DOT HQ', type: 'ground', x: 500, y: 320, info: 'DOT headquarters node with server co-location' },
+            { id: 'ground3', label: 'Mountain Repeater', sublabel: 'Remote', type: 'ground', x: 700, y: 280, info: 'Solar-powered repeater, 100+ mile coverage circle' },
+            
+            // Gateway
+            { id: 'gateway', label: 'Internet Gateway', sublabel: 'WiFi/Ethernet', type: 'ground', x: 400, y: 450, info: 'Bridge between LoRa mesh and internet services' },
+            
+            // Cloud Infrastructure
+            { id: 'mqtt', label: 'MQTT Broker', sublabel: 'Mosquitto', type: 'cloud', x: 400, y: 600, info: 'Central message broker, telemetry collection, node monitoring' },
+            { id: 'database', label: 'Time-Series DB', sublabel: 'InfluxDB', type: 'cloud', x: 250, y: 700, info: 'Telemetry storage, historical data, analytics' },
+            { id: 'dashboard', label: 'Grafana', sublabel: 'Monitoring', type: 'cloud', x: 550, y: 700, info: 'Real-time dashboards, node health, network statistics' },
+            
+            // External Services
+            { id: 'noaa', label: 'NOAA/NWS', sublabel: 'Weather Data', type: 'external', x: 100, y: 600, info: 'METAR, TAF, weather forecasts' },
+            { id: 'faa', label: 'FAA', sublabel: 'NOTAMs', type: 'external', x: 700, y: 600, info: 'Airspace restrictions, airport closures' },
+            
+            // Mobile Apps
+            { id: 'pilot_app', label: 'Pilot Mobile App', sublabel: 'iOS/Android', type: 'mobile', x: 150, y: 400, info: 'Bluetooth to aircraft node, offline-first, weather display' },
+            { id: 'admin_app', label: 'Admin Dashboard', sublabel: 'Web Portal', type: 'mobile', x: 650, y: 480, info: 'Network management, node configuration, telemetry' }
+        ];
+        
+        // Define links with data flow information
+        const links = [
+            // Aircraft mesh connections
+            { source: 'aircraft1', target: 'aircraft2', label: 'LoRa Mesh', color: '#4299e1', style: 'solid' },
+            { source: 'aircraft2', target: 'aircraft3', label: 'Peer Relay', color: '#4299e1', style: 'solid' },
+            { source: 'aircraft1', target: 'aircraft3', label: 'Direct Link', color: '#4299e1', style: 'dashed' },
+            
+            // Aircraft to ground
+            { source: 'aircraft1', target: 'ground1', label: 'PIREPs', color: '#4299e1', style: 'solid' },
+            { source: 'aircraft2', target: 'ground2', label: 'Telemetry', color: '#4299e1', style: 'solid' },
+            { source: 'aircraft3', target: 'ground3', label: 'Store & Forward', color: '#4299e1', style: 'solid' },
+            
+            // Ground to gateway
+            { source: 'ground1', target: 'gateway', label: 'Internet', color: '#48bb78', style: 'solid' },
+            { source: 'ground2', target: 'gateway', label: 'Internet', color: '#48bb78', style: 'solid' },
+            { source: 'ground3', target: 'gateway', label: 'Internet', color: '#48bb78', style: 'solid' },
+            
+            // Gateway to cloud
+            { source: 'gateway', target: 'mqtt', label: 'MQTT/TLS', color: '#ed8936', style: 'solid' },
+            
+            // Cloud infrastructure
+            { source: 'mqtt', target: 'database', label: 'Telemetry', color: '#ed8936', style: 'solid' },
+            { source: 'mqtt', target: 'dashboard', label: 'Real-time', color: '#ed8936', style: 'solid' },
+            { source: 'database', target: 'dashboard', label: 'Historical', color: '#ed8936', style: 'dashed' },
+            
+            // External services
+            { source: 'noaa', target: 'mqtt', label: 'Weather', color: '#9f7aea', style: 'solid' },
+            { source: 'faa', target: 'mqtt', label: 'NOTAMs', color: '#9f7aea', style: 'solid' },
+            
+            // Mobile apps
+            { source: 'aircraft1', target: 'pilot_app', label: 'Bluetooth', color: '#f56565', style: 'solid' },
+            { source: 'gateway', target: 'admin_app', label: 'HTTPS', color: '#f56565', style: 'solid' }
+        ];
+        
+        // Color mapping
+        const colors = {
+            aircraft: '#4299e1',
+            ground: '#48bb78',
+            cloud: '#ed8936',
+            external: '#9f7aea',
+            mobile: '#f56565'
+        };
+        
+        // Create SVG
+        const svg = d3.select('#network')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        // Add definitions for arrowheads
+        svg.append('defs').selectAll('marker')
+            .data(['aircraft', 'ground', 'cloud', 'external', 'mobile'])
+            .enter().append('marker')
+            .attr('id', d => `arrow-${d}`)
+            .attr('viewBox', '0 -5 10 10')
+            .attr('refX', 30)
+            .attr('refY', 0)
+            .attr('markerWidth', 6)
+            .attr('markerHeight', 6)
+            .attr('orient', 'auto')
+            .append('path')
+            .attr('fill', d => colors[d])
+            .attr('d', 'M0,-5L10,0L0,5');
+        
+        // Draw links
+        const linkElements = svg.append('g')
+            .selectAll('path')
+            .data(links)
+            .enter().append('path')
+            .attr('class', 'link')
+            .attr('stroke', d => d.color)
+            .attr('stroke-dasharray', d => d.style === 'dashed' ? '5,5' : '0')
+            .attr('marker-end', d => {
+                const sourceNode = nodes.find(n => n.id === d.source);
+                return `url(#arrow-${sourceNode.type})`;
+            });
+        
+        // Draw nodes
+        const nodeElements = svg.append('g')
+            .selectAll('g')
+            .data(nodes)
+            .enter().append('g')
+            .attr('class', 'node')
+            .attr('transform', d => `translate(${d.x},${d.y})`);
+        
+        // Add node shapes
+        nodeElements.append('circle')
+            .attr('r', 25)
+            .attr('fill', d => colors[d.type])
+            .attr('stroke', 'white')
+            .attr('stroke-width', 3)
+            .on('mouseover', function(event, d) {
+                d3.select('#tooltip')
+                    .style('opacity', 1)
+                    .html(`<strong>${d.label}</strong><br/>${d.info}`)
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 10) + 'px');
+            })
+            .on('mouseout', function() {
+                d3.select('#tooltip').style('opacity', 0);
+            });
+        
+        // Add node icons (simple text)
+        nodeElements.append('text')
+            .attr('dy', 5)
+            .attr('text-anchor', 'middle')
+            .attr('fill', 'white')
+            .attr('font-size', '20px')
+            .text(d => {
+                if (d.type === 'aircraft') return '✈';
+                if (d.type === 'ground') return '📡';
+                if (d.type === 'cloud') return '☁';
+                if (d.type === 'external') return '🌐';
+                if (d.type === 'mobile') return '📱';
+            });
+        
+        // Add node labels
+        nodeElements.append('text')
+            .attr('class', 'node-label')
+            .attr('dy', 45)
+            .text(d => d.label);
+        
+        nodeElements.append('text')
+            .attr('class', 'node-sublabel')
+            .attr('dy', 58)
+            .text(d => d.sublabel);
+        
+        // Update link paths
+        function updateLinks() {
+            linkElements.attr('d', d => {
+                const source = nodes.find(n => n.id === d.source);
+                const target = nodes.find(n => n.id === d.target);
+                
+                // Calculate path with curve
+                const dx = target.x - source.x;
+                const dy = target.y - source.y;
+                const dr = Math.sqrt(dx * dx + dy * dy) * 0.3;
+                
+                return `M ${source.x} ${source.y} Q ${(source.x + target.x) / 2} ${(source.y + target.y) / 2 - dr} ${target.x} ${target.y}`;
+            });
+        }
+        
+        updateLinks();
+        
+        // Add data flow animation
+        function animateDataFlow() {
+            const flowPaths = ['aircraft1', 'ground1', 'gateway', 'mqtt'].map((id, i, arr) => {
+                if (i < arr.length - 1) {
+                    return links.find(l => l.source === id && l.target === arr[i + 1]);
+                }
+                return null;
+            }).filter(Boolean);
+            
+            flowPaths.forEach((link, i) => {
+                setTimeout(() => {
+                    const pathElement = linkElements.filter(l => l === link);
+                    pathElement
+                        .attr('stroke-width', 4)
+                        .transition()
+                        .duration(500)
+                        .attr('stroke-width', 2);
+                }, i * 300);
+            });
+        }
+        
+        // Animate every 3 seconds
+        setInterval(animateDataFlow, 3000);
+        animateDataFlow();
+    </script>
+</body>
+</html>
