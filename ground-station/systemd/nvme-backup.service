@@ -1,0 +1,11 @@
+[Unit]
+Description=DOT-VHF NVMe backup to central server via rclone
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=blastly
+ExecStart=/home/blastly/scripts/nvme-backup.sh
+StandardOutput=journal
+StandardError=journal

@@ -1,0 +1,21 @@
+[Unit]
+Description=skyaware978 — UAT web map JSON writer
+After=dump978-fa.service
+Requires=dump978-fa.service
+
+[Service]
+Type=simple
+User=blastly
+ExecStart=/usr/local/bin/skyaware978 \
+    --connect 127.0.0.1:30978 \
+    --json-dir /run/dump978 \
+    --lat 61.2181 \
+    --lon -149.9003 \
+    --reconnect-interval 10
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

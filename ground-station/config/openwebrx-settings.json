@@ -1,0 +1,43 @@
+{
+    "version": 7,
+    "receiver_name": "DOT-VHF SkyBridge Alaska",
+    "receiver_location": "Anchorage, Alaska",
+    "receiver_asl": 40,
+    "receiver_admin": "skybridge@example.com",
+    "receiver_gps": {"lat": 61.2181, "lon": -149.9003},
+    "sdrs": {
+        "rtlsdr": {
+            "name": "Blog V4 (VHF Aviation)",
+            "type": "rtl_sdr",
+            "device": "BLOGV4",
+            "ppm": 0,
+            "rtltcp_compat": 1235,
+            "profiles": {
+                "vhf_air_low": {
+                    "name": "VHF Air Low (Tower/ATIS/App/Clearance)",
+                    "center_freq": 119050000,
+                    "rf_gain": 29,
+                    "samp_rate": 2400000,
+                    "start_freq": 118400000,
+                    "start_mod": "am"
+                },
+                "vhf_air_mid": {
+                    "name": "VHF Air (General Aviation)",
+                    "center_freq": 121800000,
+                    "rf_gain": 29,
+                    "samp_rate": 2400000,
+                    "start_freq": 121500000,
+                    "start_mod": "am"
+                },
+                "vhf_air_high": {
+                    "name": "VHF Air High (Merrill/Lake Hood/App 3)",
+                    "center_freq": 127000000,
+                    "rf_gain": 29,
+                    "samp_rate": 2400000,
+                    "start_freq": 126400000,
+                    "start_mod": "am"
+                }
+            }
+        }
+    }
+}

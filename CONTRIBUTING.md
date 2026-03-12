@@ -1,84 +1,81 @@
 # Contributing to SkyBridge Alaska
 
-We welcome contributions to the SkyBridge project! By contributing, you're helping improve aviation safety in Alaska and beyond.
+We welcome contributions. By contributing, you're helping improve aviation safety in Alaska and beyond.
 
 ## Contributor License Agreement (CLA)
 
-**Important**: All contributors must sign our CLA before pull requests can be merged. This allows SkyBridge to maintain dual licensing (AGPL-3.0 and commercial).
+All contributors must sign our CLA before pull requests can be merged. This enables dual licensing (AGPL-3.0 and commercial).
 
-### Why we need a CLA
-- Enables us to offer commercial licenses to fund development
-- Allows free licenses for State of Alaska, SAR organizations, and small operators
-- Protects the project's ability to evolve its licensing if needed
+**Why:** Allows commercial licenses to fund development while keeping the core system free for state agencies, SAR organizations, and small operators.
 
-### How to sign the CLA
-1. Read the full CLA at: https://skybridgealaska.net/cla (coming soon)
-2. Sign electronically via GitHub (automated on first PR)
-3. One-time process per contributor
+**How:** CLA will be presented automatically on your first pull request via GitHub.
 
-## Development Process
+## Getting Started
 
-### Setting up your environment
 ```bash
 git clone https://github.com/SFETTAK/Skybridge-Alaska.git
 cd Skybridge-Alaska
-# See /docs/development.md for detailed setup
 ```
 
-### Code contributions
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to your branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Repository Structure
 
-### Reporting issues
-- Check existing issues first
-- Include steps to reproduce
-- Specify hardware/software versions
-- Attach logs if applicable
+| Directory | What's There | Language |
+|-----------|-------------|----------|
+| `ground-station/scripts/` | VHF pipeline, dashboard, backup | Python |
+| `ground-station/systemd/` | Service and timer unit files | systemd INI |
+| `ground-station/config/` | OpenWebRX, readsb, SSH, fail2ban | JSON/conf |
+| `app/` | Mobile app (early scaffold) | React Native / JS |
+| `protocol/` | TAIGA ASN.1 protocol docs | Markdown |
+| `hardware/` | Hardware specifications | Markdown |
+| `docs/` | Project documentation | Markdown |
+
+### Running the Test Suite
+
+The VHF pipeline has a 17-test validation suite that runs without SDR hardware:
+
+```bash
+# On a Pi or any Linux box with Python 3 + dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install numpy faster-whisper
+python ground-station/scripts/test-pipeline.py
+```
 
 ## Code Standards
 
-### General
-- Clear, self-documenting code
-- Comments for complex logic
-- Follow existing patterns
+### Python (Ground Station)
+- PEP 8 style
+- Type hints where it helps readability
+- numpy for DSP, faster-whisper for STT
+- Test with `test-pipeline.py` before submitting
 
-### C/C++ (Firmware)
-- Arduino style for Meshtastic compatibility
-- Memory-conscious (embedded systems)
-
-### JavaScript/TypeScript (App)
-- ESLint configuration provided
+### JavaScript/TypeScript (Mobile App)
+- ESLint + Prettier (config in `app/`)
 - React Native best practices
 
-### Python (Tools)
-- PEP 8 style
-- Type hints where applicable
+### Configuration Files
+- Comment any non-obvious settings
+- Include the default value in comments when overriding
 
-## Testing
+## Submitting Changes
 
-- Test on actual hardware when possible
-- Include unit tests for new features
-- Document test procedures
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Test on hardware if possible, or run the test suite
+4. Commit with a clear message
+5. Open a Pull Request describing what and why
 
-## Documentation
+## Reporting Issues
 
-- Update README.md if needed
-- Add inline code documentation
-- Create /docs entries for new features
+- Check existing issues first
+- Include: steps to reproduce, hardware/software versions, relevant logs
+- For SDR issues: include `lsusb` output and `rtl_test` results
 
-## Questions?
+## Questions
 
-- GitHub Discussions: Technical questions
-- Email: dev@skybridgealaska.net (coming soon)
+- **GitHub Issues**: Bug reports and feature requests
+- **GitHub Discussions**: Technical questions and design conversations
 
 ## Recognition
 
-Contributors will be recognized in:
-- CONTRIBUTORS.md file
-- Project announcements
-- Annual safety impact report
-
-Thank you for helping make Alaska's skies safer!
+Contributors are recognized in project announcements and the annual safety impact report.

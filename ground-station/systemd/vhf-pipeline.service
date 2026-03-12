@@ -1,0 +1,21 @@
+[Unit]
+Description=DOT-VHF Pipeline (VHF AM -> archive + Whisper STT -> Meshtastic)
+After=openwebrx.service network.target
+Wants=openwebrx.service
+
+[Service]
+Type=simple
+User=blastly
+Environment="MESH_HOST="
+Environment="MESH_PORT=4403"
+Environment="MESH_CHANNEL=0"
+Environment="WHISPER_MODEL=tiny.en"
+ExecStartPre=/bin/sleep 5
+ExecStart=/home/blastly/vhf-pipeline-venv/bin/python /home/blastly/scripts/vhf-pipeline.py
+Restart=on-failure
+RestartSec=15
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenWebRX WebSDR receiver (DOT-VHF)
+After=network.target
+
+[Service]
+Type=simple
+User=blastly
+Group=blastly
+WorkingDirectory=/home/blastly/openwebrx
+Environment="OPENWEBRX_CONFIG_DIR=/etc/openwebrx"
+ExecStart=/home/blastly/openwebrx/venv/bin/python openwebrx.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

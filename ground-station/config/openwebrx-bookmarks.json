@@ -1,0 +1,97 @@
+[
+    {
+        "name": "PANC AWOS",
+        "frequency": 114300000,
+        "modulation": "am"
+    },
+    {
+        "name": "ANC Tower",
+        "frequency": 118300000,
+        "modulation": "am"
+    },
+    {
+        "name": "PANC ATIS",
+        "frequency": 118400000,
+        "modulation": "am"
+    },
+    {
+        "name": "PANC Approach/Departure 1",
+        "frequency": 118600000,
+        "modulation": "am"
+    },
+    {
+        "name": "PANC Approach/Departure 2",
+        "frequency": 119100000,
+        "modulation": "am"
+    },
+    {
+        "name": "ANC Clearance Delivery",
+        "frequency": 119400000,
+        "modulation": "am"
+    },
+    {
+        "name": "Guard / Emergency 121.5",
+        "frequency": 121500000,
+        "modulation": "am"
+    },
+    {
+        "name": "Merrill Ground",
+        "frequency": 121700000,
+        "modulation": "am"
+    },
+    {
+        "name": "ANC Ground",
+        "frequency": 121900000,
+        "modulation": "am"
+    },
+    {
+        "name": "FSS Kenai Radio",
+        "frequency": 122200000,
+        "modulation": "am"
+    },
+    {
+        "name": "ANC Unicom",
+        "frequency": 122950000,
+        "modulation": "am"
+    },
+    {
+        "name": "PANC Approach/Departure 4",
+        "frequency": 123800000,
+        "modulation": "am"
+    },
+    {
+        "name": "Merrill ATIS / Weather",
+        "frequency": 124250000,
+        "modulation": "am"
+    },
+    {
+        "name": "Lake Hood Weather",
+        "frequency": 125600000,
+        "modulation": "am"
+    },
+    {
+        "name": "Merrill Tower",
+        "frequency": 126000000,
+        "modulation": "am"
+    },
+    {
+        "name": "PANC Approach/Departure 3",
+        "frequency": 126400000,
+        "modulation": "am"
+    },
+    {
+        "name": "Lake Hood Tower",
+        "frequency": 126800000,
+        "modulation": "am"
+    },
+    {
+        "name": "ANC Clearance 2",
+        "frequency": 128650000,
+        "modulation": "am"
+    },
+    {
+        "name": "ANC Heavy Traffic",
+        "frequency": 135150000,
+        "modulation": "am"
+    }
+]

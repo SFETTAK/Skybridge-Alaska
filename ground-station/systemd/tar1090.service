@@ -1,0 +1,23 @@
+# tar1090 systemd unit file
+[Unit]
+Description=tar1090 - compress dump1090 json data
+Wants=network.target
+After=network.target
+After=readsb.service
+After=dump1090-fa.service
+
+[Service]
+User=tar1090
+SyslogIdentifier=tar1090
+RuntimeDirectory=tar1090
+RuntimeDirectoryMode=0755
+EnvironmentFile=/usr/local/share/tar1090/example_config_dont_edit
+EnvironmentFile=/etc/default/tar1090
+ExecStart=/usr/local/share/tar1090/tar1090.sh /run/tar1090 /run/readsb
+Type=simple
+Restart=always
+RestartSec=30
+Nice=19
+
+[Install]
+WantedBy=default.target

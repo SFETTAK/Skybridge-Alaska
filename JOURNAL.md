@@ -1,102 +1,82 @@
-# SkyBridge Alaska - Development Journal
+# SkyBridge Alaska — Project Journal
 
-## 2024-09-17 14:45 UTC — Steven Fett & AI Assistant
-### Repository Preparation for NASAO 2025
-
-**Major Milestone: Complete GitHub Repository Preparation**
-
-#### Actions Taken:
-- **Cleaned directory structure** - Moved private files (Photos, Research, SDR, Rev, Tenego Labs, patents, strategy docs) to PRIVATE/ folder
-- **Added NASA TAIGA ASN.1 Reference** to public docs/ - confirmed as public domain NASA technical memorandum
-- **Enhanced README.md** with Washington Post credibility, Gap Analysis validation, and professional presentation format
-- **Created comprehensive documentation suite**:
-  - `docs/media_coverage.md` - Washington Post investigation analysis
-  - `docs/alaska_aviation_gap_analysis_summary.md` - Official state study validation
-  - `docs/existing_solutions_analysis.md` - eSRS competitive analysis  
-  - `docs/technical_whitepaper_summary.md` - Complete system capabilities
-  - `docs/elevator_pitch.md` - NASAO presentation materials
-  - `docs/README.md` - Documentation index
-- **Added visual assets** - Network topology diagrams for professional presentation
-- **Created .gitignore** - Comprehensive exclusion of private/sensitive content
-
-#### Key Discoveries:
-1. **Washington Post Article (2014)** provides devastating validation - 263-foot terrain mapping errors killed Stack/Beane, "Mars is better mapped than Alaska"
-2. **Alaska Aviation Gap Analysis** official state study proves every aspect of SkyBridge's mission with hard data
-3. **eSRS Program** shows government already acknowledges infrastructure gaps and pilots pay for satellite alternatives
-4. **Technical Whitepaper** reveals operational system - not concept, but working mesh network with mobile app
-
-#### Strategic Positioning Achieved:
-- **Government Validation** - Official Alaska DOT&PF Gap Analysis supports mission
-- **Media Credibility** - Washington Post investigation provides expert quotes and statistics  
-- **Technical Foundation** - NASA TAIGA protocol gives scientific legitimacy
-- **Market Validation** - eSRS program proves demand and willingness to pay
-- **Operational Proof** - Working system with demonstrated capabilities
-
-#### NASAO 2025 Readiness:
-Repository now contains everything needed for compelling multi-state presentation:
-- Credible problem validation (Washington Post, Gap Analysis)
-- Government endorsement (Alaska DOT&PF partnership)
-- Technical legitimacy (NASA protocol, working system)
-- Economic advantage ($50 vs $350K+ traditional solutions)
-- Competitive differentiation (mesh vs satellite point-to-point)
-
-#### Next Steps:
-- [ ] Install Git and push to public GitHub repository
-- [ ] Generate business cards with GitHub URL for NASAO distribution
-- [ ] Practice elevator pitch with new statistics and validation points
-- [ ] Prepare presentation materials highlighting government studies and media coverage
-
-#### Context for Future Development:
-This repository preparation represents the culmination of extensive research validation and strategic positioning. The combination of official government studies, media investigation, technical documentation, and operational proof creates a compelling case for multi-state adoption that addresses real infrastructure failures with proven solutions.
-
-**Status**: Ready for NASAO 2025 presentation and multi-state pilot program discussions.
+Decision log and milestones. For detailed system documentation, see [docs/project-handoff/](docs/project-handoff/).
 
 ---
 
-## 2024-09-17 16:30 UTC — Steven Fett & AI Assistant
-### Final Repository Optimization and GitHub Publication
+## 2024-09-17 — Repository Created for NASAO 2025
 
-**Major Milestone: Repository Published with Killer Messaging**
+Prepared and published the initial GitHub repository for presentation at the National Association of State Aviation Officials (NASAO) 2025 conference.
 
-#### Critical Improvements Made:
-- **Pilot-first messaging** - Moved direct pilot benefits to top of README to hook stubborn pilots immediately
-- **VHF transcription as killer feature** - "NEVER MISS VHF TRAFFIC, NEVER MISS WEATHER, NO SUBSCRIPTIONS!"
-- **Privacy messaging** - "You control what you share" addresses pilot privacy concerns
-- **Honest capability assessment** - Working prototypes with clear development roadmap
-- **Enhanced industry partnerships** - Rokland VHF/ADS-B/SDR integration plans documented
-- **Revenue generation emphasis** - TieDown payments anywhere in Alaska
-- **Network effects messaging** - Gets better with more pilot adoption
+**Key actions:**
+- Moved private files (patents, strategy, photos) to PRIVATE/ folder
+- Added NASA TAIGA ASN.1 reference (public domain)
+- Created documentation suite: whitepaper, gap analysis, elevator pitch, media coverage, partnership docs
+- Published to https://github.com/SFETTAK/Skybridge-Alaska
 
-#### Documentation Structure Finalized:
-- **Eliminated redundancy** - Removed circular explanations and repetitive sections
-- **Clean flow** - Pilot Benefits → Problem → How It Works → Technical → Officials → Resources
-- **First-person pilot benefits** - Direct "What's in it for YOU" messaging
-- **Professional licensing** - Clear free/commercial tiers with specific categories
-- **Complete technical backing** - NASA TAIGA, patents, Gap Analysis, media coverage
-
-#### Key Messaging Breakthroughs:
-- **"Every pilot knows the pain"** - Universal frustration with missing critical radio calls
-- **"All of this on your phone or tablet"** - Leverages existing devices
-- **"No corporate overlords"** - Anti-corporate messaging for independent pilots
-- **VHF transcription emphasis** - Revolutionary capability no other system provides
-
-#### Repository Status:
-- **Securely published** to https://github.com/SFETTAK/Skybridge-Alaska
-- **25+ professional documents** ready for NASAO presentation
-- **Government validation** through official Alaska DOT&PF studies
-- **Industry partnerships** with Meshtastic and Rokland Technologies
-- **Patent protection** through three USPTO provisional applications
-
-#### Next Phase: Visual Enhancement and Presentation Materials
-- [ ] Review GitHub repository presentation quality
-- [ ] Brainstorm and create professional graphics and infographics
-- [ ] Design business cards with QR codes for NASAO distribution
-- [ ] Generate presentation materials for multi-state officials
-- [ ] Prepare final repository update with visual enhancements
-
-**Status**: Repository published and optimized. Ready for visual enhancement phase and NASAO 2025 presentation preparation.
+**Positioning achieved:** Government validation (Alaska DOT&PF Gap Analysis), media credibility (Washington Post investigation), technical legitimacy (NASA TAIGA protocol), patent protection (3 provisional applications filed).
 
 ---
 
-## Future Entries
-*Add subsequent development milestones, deployment updates, and partnership announcements below*
+## 2025-03-04 — DOT-VHF Ground Station: Design Decisions
+
+Started building the first physical ground station on a Raspberry Pi 5 (hostname: DOT-VHF).
+
+**Hardware decisions:**
+- 3x RTL-SDR dongles: Blog V4 (VHF), two FlyCatchers (1090 MHz ADS-B + 978 MHz UAT)
+- FlyCatcher can't do analog VHF and ADS-B simultaneously — dedicated dongle per band
+- Hailo-8 AI HAT+ present but **disabled** — NVMe SSD takes M.2 slot priority. CPU Whisper is sufficient.
+- 2 TB NVMe SSD for all data archival (audio, transcripts, ADS-B history)
+
+**Software stack chosen:**
+- OpenWebRX (jketterl) for web SDR interface + shared IQ via rtl_tcp compat port
+- Custom VHF pipeline: AM demod (numpy) → energy VAD → FLAC archive → Whisper STT → Meshtastic
+- readsb for 1090 MHz ADS-B, dump978-fa for 978 MHz UAT
+- tar1090 for combined aircraft tracking web map
+
+**Design doc:** `docs/dot_vhf_software_stack.md`
+
+---
+
+## 2025-03-04 — DOT-VHF: Full Stack Deployed
+
+All core software built from source and running as systemd services:
+
+- **OpenWebRX** — 3 VHF aviation profiles (119.05, 121.8, 127.0 MHz), 19 Anchorage bookmarks, port 8073
+- **VHF pipeline** — AM demod → VAD → FLAC archive → Whisper tiny.en (CPU int8) → NVMe transcripts. Meshtastic TX ready but hardware not yet connected
+- **readsb + tar1090** — 1090 MHz ADS-B with globe-history to NVMe, web map on port 8504
+- **dump978 + skyaware978** — 978 MHz UAT decoder, JSON overlay on tar1090
+- **Status dashboard** — HTML health page refreshing every 30s, served on port 8080
+- **NVMe backup** — rclone sync every 6h via systemd timer (remote pending central server)
+- **SSH hardening** — Ed25519 key-only, fail2ban (5 retries → 1h ban)
+- **Test suite** — 17/17 tests passing, runs without SDR hardware
+
+USB serial numbers programmed into all 3 dongles (BLOGV4, ADSB1090, UAT978) for persistent device ID.
+
+---
+
+## 2026-03-12 — Repository Refactor and Documentation
+
+Restructured the GitHub repository to include the actual deployed ground station code (previously only existed on the Pi).
+
+**Changes:**
+- Added `ground-station/` directory with all scripts, systemd units, and config files
+- Created `docs/project-handoff/` with full inventory and operational documentation
+- Rewrote README.md to reflect the real deployed system
+- Rewrote ARCHITECTURE.md and SPECIFICATIONS.md to match actual hardware
+- Moved NASAO 2025 pitch materials to `docs/nasao-2025/`
+- Deleted redundant summary docs (gap analysis summary, whitepaper summary)
+- Added implementation status notes to TAIGA protocol doc
+- Properly git-cloned the repo (was previously curl-downloaded)
+
+---
+
+## Open Items
+
+Hardware-dependent (require onsite access):
+- [ ] Reboot Pi to apply USB serial numbers, then update dump978-fa to use serial=UAT978
+- [ ] Connect Meshtastic LoRa node (USB serial or set MESH_HOST in vhf-pipeline.service)
+- [ ] Configure rclone remote `skybridge-central` when central server is available
+- [ ] Tune VAD threshold with real RF signal on antenna
+- [ ] Set readsb location: `sudo readsb-set-location 61.2181 -149.9003`
+- [ ] Weather API integration (on-site weather system, vendor TBD)

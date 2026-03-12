@@ -1,129 +1,172 @@
 # SkyBridge Alaska
-## Aviation Safety Mesh Network
-*Saving Lives Through Community-Powered Infrastructure*
+
+**Aviation safety mesh network for general aviation in Alaska.**
+
+SkyBridge is a system built by Alaska DOT&PF that captures VHF aviation radio, ADS-B aircraft transponders, and UAT weather data using low-cost software-defined radios, transcribes pilot voice communications with AI, and distributes critical flight information over a Meshtastic LoRa mesh network — no cell towers or satellites required.
 
 ![Aviation Mesh Network](docs/SDR-Mesh-GeneralAviation.png)
 
-## For Pilots
+---
 
-**Never miss critical radio calls again.** You know that sinking feeling when you realize you missed THE critical weather report or traffic advisory that was said once when you were out of range. With SkyBridge, Alaska DOT&PF base stations capture every VHF transmission and send it to your phone as text. You'll always know what was said.
+## What's Here
 
-**Everything on your phone or tablet.** No new expensive avionics to buy or learn. The SkyBridge app runs on the iPhone or Android device you already carry. Your phone becomes your complete aviation services portal.
+This repository contains the complete SkyBridge Alaska project: deployed ground station code, system configurations, project documentation, and reference materials.
 
-**You pay once, use forever.** $50 for the [Meshtastic](https://meshtastic.org) radio, then you're done. No monthly subscriptions, no satellite fees, no corporate overlords bleeding you dry. Your radio, your network, your control.
-
-**You control what you share.** Share your location if you want, keep it private if you don't. Share weather reports to help other pilots, or just receive information. The network works for you, not against you.
-
-**Your network gets stronger with more pilots.** Every pilot who joins makes coverage better for everyone. More reliability, more safety, more information. You're not just buying a radio, you're joining a community that has each other's backs.
+```
+Skybridge-Alaska/
+|
+|-- ground-station/          <-- Deployed code running on DOT-VHF (Raspberry Pi 5)
+|   |-- scripts/
+|   |   |-- vhf-pipeline.py        VHF radio -> AM demod -> Whisper STT -> Meshtastic
+|   |   |-- test-pipeline.py       17-test validation suite (runs without hardware)
+|   |   |-- status-dashboard.py    Live HTML station health dashboard
+|   |   +-- nvme-backup.sh         Automated rclone backup to central server
+|   |-- systemd/                   All service and timer unit files
+|   +-- config/                    OpenWebRX, readsb, tar1090, SSH, fail2ban configs
+|
+|-- docs/
+|   |-- project-handoff/     <-- Full project documentation package
+|   |   |-- 00-INDEX.md            Master index
+|   |   |-- 01-HARDWARE-INVENTORY.md
+|   |   |-- 02-SOFTWARE-INVENTORY.md
+|   |   |-- 03-SYSTEM-ARCHITECTURE.md
+|   |   |-- 04-CONFIGURATION-REFERENCE.md
+|   |   +-- 05-OPERATIONAL-RUNBOOK.md
+|   |-- nasao-2025/          <-- NASAO presentation materials and research
+|   +-- TAIGA_ASN1_Reference.pdf   NASA TAIGA protocol spec
+|
+|-- app/                     <-- Mobile app scaffold (React Native, early stage)
+|-- hardware/                <-- Hardware specifications and cost targets
+|-- protocol/                <-- TAIGA ASN.1 protocol documentation
+|-- ARCHITECTURE.md          <-- System design overview
+|-- JOURNAL.md               <-- Project decision log
+|-- LICENSE.md               <-- Dual AGPL-3.0 / Commercial
++-- CONTRIBUTING.md
+```
 
 ---
 
-## The Problem We're Solving
+## DOT-VHF Ground Station
 
-**The aviation crisis is real and deadly:** As [The Washington Post](https://www.adn.com/aviation/article/alaska-s-outdated-maps-make-flying-peril-high-tech-fix-gaining-ground/2014/10/15/) reported, terrain mapping errors of 263+ feet contributed to fatal crashes, with one expert noting *"Mars is better mapped than the state of Alaska."* Traditional government solutions remain stuck in budget gridlock after decades.
+The first deployed ground station, running on a Raspberry Pi 5 in Anchorage, Alaska.
 
-**SkyBridge is the breakthrough:** A $50 peer-to-peer solution that bypasses failed government infrastructure.
+### Hardware (~$470 deployed)
 
-### The Crisis Behind the Solution
+| Component | Purpose |
+|-----------|---------|
+| Raspberry Pi 5 (16 GB) | Compute |
+| 2 TB NVMe SSD | Audio/ADS-B/transcript archive |
+| RTL-SDR Blog V4 | VHF aviation radio (118-137 MHz) |
+| RTL-SDR FlyCatcher x2 | ADS-B 1090 MHz + UAT 978 MHz |
+| Meshtastic LoRa radio | Mesh network relay (planned) |
 
-Alaska pilots are 36 times more likely to die than the average US worker according to the CDC. Terrain maps contain errors up to 263 feet, directly contributing to fatal crashes as documented in The Washington Post investigation. Since 2008, 15 "controlled flight into terrain" crashes have killed 16 people and left 7 seriously injured according to NTSB data.
+### What It Does
 
-The problem is infrastructure: no reliable weather or NOTAM updates in remote areas covering 80% of Alaska. Government mapping solutions remain stuck in budget gridlock, with $30 million needed just to finish mapping Alaska. As aviation safety expert Steve Colligan noted, "Mars is better mapped than the state of Alaska."
+**VHF Voice Pipeline** (`ground-station/scripts/vhf-pipeline.py`)
+1. Receives IQ samples from RTL-SDR via OpenWebRX's rtl_tcp interface
+2. Demodulates AM aviation audio (centered on 121.8 MHz guard/unicom)
+3. Detects voice transmissions with energy-based VAD
+4. Archives voice segments as FLAC to NVMe
+5. Transcribes speech using Whisper (faster-whisper, tiny.en model, CPU)
+6. Publishes transcripts to Meshtastic mesh network
+7. Logs all transcripts to NVMe for historical record
 
-## How It Works
+**ADS-B Tracking**
+- 1090 MHz Extended Squitter via readsb with globe-history archival
+- 978 MHz UAT via dump978-fa for GA traffic and FIS-B weather
+- Web map at tar1090 combining both feeds
 
-SkyBridge is a **mobile app and web platform** for Alaska aviation services that **works anywhere, even in the sky** using a simple $50 [Meshtastic](https://meshtastic.org) radio that plugs into aircraft power.
+**Station Monitoring**
+- Live status dashboard showing service health, NVMe SMART, aircraft count, latest transcripts
+- Automated backup to central server every 6 hours via rclone
+- Log rotation, NVMe health checks
 
-**Simple setup:** Install the app, plug in the radio, and your phone becomes your complete aviation services portal - **no cell towers or satellites required.**
+### Services Running
 
-### Technology Stack
-- **Hardware**: Affordable LoRa radios available from multiple vendors
-- **Protocol**: NASA TAIGA ASN.1 for efficient data compression  
-- **Network**: [Meshtastic](https://meshtastic.org) open-source mesh networking, proven technology used worldwide
-- **Interface**: Mobile app for iOS and Android
+| Service | Port | Purpose |
+|---------|------|---------|
+| OpenWebRX | 8073 | Web SDR spectrum viewer |
+| tar1090 | 8504 | ADS-B aircraft tracking map |
+| Status Dashboard | 8080 | Station health metrics |
+| readsb | 30002-30005 | ADS-B decoder (network feeds) |
+| dump978-fa | 30978 | UAT decoder |
+| vhf-pipeline | — | VHF transcription (background) |
 
-**About [Meshtastic](https://meshtastic.org):** Don't let the name fool you. [Meshtastic](https://meshtastic.org) is serious technology used by emergency responders, hikers, and professionals worldwide. It's proven, reliable, and specifically designed for situations where everything else fails.
+---
 
-### Project Status
+## The Problem
 
-**Operational prototypes** - Working Meshtastic devices deployed and tested with pilots  
-**Active expansion** - Alaska DOT&PF pilot program scaling statewide  
-**Patent protection** - Three provisional patents filed protecting core innovations  
-**Industry partnerships** - Active collaboration with Meshtastic and Rokland Technologies  
-**Multi-state interest** - Ready for coordinated deployment nationwide  
-**IP protection** - State-owned patents enable confident commercial partnerships  
+Alaska pilots face a **36x higher fatality rate** than the average US worker. Remote areas covering 80% of the state have no reliable weather updates, NOTAMs, or VHF radio coverage. Traditional ground station infrastructure costs $200K+ per site. Terrain maps contain errors up to 263 feet — directly contributing to fatal crashes.
 
-![Network Topology](docs/network.jpg)
+SkyBridge addresses this with a **$50-per-pilot mesh network** backed by AI-powered ground stations that cost under $500 each.
 
-**This is not just a concept - we have working prototypes.** We have [Meshtastic](https://meshtastic.org) radios deployed and tested, with pilots successfully exchanging text messages and status updates across the mesh network. The full aviation data integration is in active development.
+## Technology
 
-### License Options
+- **SDR**: RTL-SDR dongles for multi-band reception (VHF, 1090 MHz, 978 MHz)
+- **DSP**: OpenWebRX + csdr for signal processing
+- **STT**: OpenAI Whisper (faster-whisper, CPU int8 quantization)
+- **Mesh**: Meshtastic LoRa (902-928 MHz ISM band, 50+ mile range at altitude)
+- **Protocol**: NASA TAIGA ASN.1 for 80% data compression
+- **Platform**: Raspberry Pi 5 + NVMe, all open source
 
-**Dual licensing supports both public safety and commercial innovation:**
+## Project Status
 
-#### **Free Use (AGPL-3.0)**
-- **State and federal agencies** (Alaska DOT&PF, FAA, NOAA, NWS)
-- **Search and rescue organizations** 
-- **Educational institutions**
-- **Small Part 135 operators** (fewer than 5 aircraft)
-- **501(c)(3) nonprofits** serving Alaska aviation
+| Milestone | Status |
+|-----------|--------|
+| Ground station hardware deployed | Done |
+| VHF pipeline (demod + VAD + archive) | Done |
+| Whisper STT integration | Done |
+| ADS-B 1090 + 978 UAT tracking | Done |
+| Status dashboard + monitoring | Done |
+| NVMe archival + backup automation | Done |
+| Test suite (17 tests, no hardware needed) | Done |
+| Meshtastic mesh relay | Hardware pending |
+| Mobile app (React Native) | Early scaffold |
+| Multi-station deployment | Planning |
+| NASA TAIGA protocol encoding | Documented, not yet implemented |
 
-#### **Commercial License Required**
-- Part 135 operators with 5+ aircraft
-- Part 121 air carriers  
-- Oil & gas, mining, tourism companies
-- Out-of-state commercial operators
-- Technology companies creating derivative products
+## Quick Start (Ground Station)
 
-**Contact**: [commercial@skybridgealaska.net](mailto:commercial@skybridgealaska.net) for licensing inquiries
+See the [Operational Runbook](docs/project-handoff/05-OPERATIONAL-RUNBOOK.md) for full setup and troubleshooting.
 
-See [LICENSE.md](LICENSE.md) for complete terms.
+```bash
+# SSH into the station
+ssh blastly@192.168.1.81
 
+# Check all services
+systemctl status openwebrx readsb dump978-fa tar1090 status-dashboard vhf-pipeline
 
-### For State Aviation Officials
+# Run the test suite (no hardware needed)
+source ~/vhf-pipeline-venv/bin/activate
+python ~/scripts/test-pipeline.py
 
-**Why SkyBridge Matters to Your State:**
-- **Rural aviation challenges aren't unique to Alaska** - Montana, Idaho, Wyoming, Colorado face similar terrain and weather risks
-- **$50 nodes vs $200K ground stations** - Economically viable for rural airports and pilot communities  
-- **State control, not federal dependency** - Community-operated infrastructure under state oversight
-- **Revenue potential** - Commercial licensing funds ongoing development while keeping core system open source
-- **Interstate cooperation** - Shared development costs, shared safety benefits
+# View live dashboard
+open http://192.168.1.81:8080
+```
 
-**Advanced Integration Capabilities:**
-- **All-in-one radio solution** - [Rokland Technologies](https://rokland.com) partnership developing VHF/ADS-B/SDR/LoRa combination units
-- **Aircraft systems integration** - CANBUS/OBD2/ARINC 429 connectivity for automated reporting
-- **Base station VHF transcription** - Ground stations automatically convert radio chatter to text and distribute via [Meshtastic](https://meshtastic.org) mesh
-- **Multi-agency support** - RWIS highway weather, UAF Volcanic Institute, USGS seismic networks all supported
+## Documentation
 
-**Ready for Multi-State Pilot Program**
-- Working [Meshtastic](https://meshtastic.org) prototypes deployed and tested
-- NASA TAIGA protocol integration proven
-- Alaska DOT&PF partnership established
-- Seeking 3-5 additional states for coordinated deployment
+| Document | Description |
+|----------|-------------|
+| [Hardware Inventory](docs/project-handoff/01-HARDWARE-INVENTORY.md) | Every component, serial number, and cost |
+| [Software Inventory](docs/project-handoff/02-SOFTWARE-INVENTORY.md) | All services, packages, and versions |
+| [System Architecture](docs/project-handoff/03-SYSTEM-ARCHITECTURE.md) | Data flow diagrams and service dependencies |
+| [Configuration Reference](docs/project-handoff/04-CONFIGURATION-REFERENCE.md) | Every config file, parameter, and port |
+| [Operational Runbook](docs/project-handoff/05-OPERATIONAL-RUNBOOK.md) | Access, monitoring, troubleshooting, maintenance |
+| [NASAO 2025 Materials](docs/nasao-2025/) | Presentation research and pitch documents |
+| [Project Journal](JOURNAL.md) | Chronological decision log |
 
-### Technical Resources
-- **[Technical Architecture](ARCHITECTURE.md)** - Complete system specifications
-- **[NASA TAIGA Protocol](https://aviationsystems.arc.nasa.gov/publications/2015/NASA-TM-2015-218427.pdf)** - Official ASN.1 specification
-- **[Hardware Specifications](hardware/SPECIFICATIONS.md)** - Component requirements and costs
-- **[Pilot Benefits & Use Cases](docs/pilot_benefits.md)** - Direct benefits and real-world scenarios
-- **[Alaska Aviation Gap Analysis](docs/gap_analysis_official.md)** - Official state study validating SkyBridge's mission
-- **[Media Coverage](docs/media_coverage.md)** - Washington Post investigation and key statistics
-- **[Existing Solutions Analysis](docs/existing_solutions_analysis.md)** - Why current satellite solutions prove SkyBridge's value
-- **[Technical Whitepaper Summary](docs/technical_whitepaper_summary.md)** - Complete system capabilities and competitive analysis
-- **[Complete Technical Whitepaper](docs/complete_technical_whitepaper.md)** - Full project documentation and deployment strategy
-- **[Intellectual Property Overview](docs/intellectual_property_overview.md)** - Patent portfolio protecting core innovations
-- **[Industry Partnerships](docs/industry_partnerships.md)** - Active collaboration with Meshtastic and Rokland Technologies
-- **[IoT Sensor Integration](docs/iot_sensor_integration.md)** - Expanding safety through distributed environmental monitoring
-- **[NASAO Elevator Pitch](docs/elevator_pitch.md)** - Presentation materials for state officials
+## License
 
-### Contact
+Dual licensed: **AGPL-3.0** for public/nonprofit use, commercial license available.
 
-Steven Fett, Alaska DOT&PF - [steven.fett@alaska.gov](mailto:steven.fett@alaska.gov)  
-Ryan Marlow, Alaska DOT&PF - [ryan.marlow@alaska.gov](mailto:ryan.marlow@alaska.gov)
+Free for: State/federal agencies, SAR organizations, educational institutions, small Part 135 operators (<5 aircraft), Alaska-serving nonprofits.
 
-**Project**: https://skybridgealaska.net  
+See [LICENSE.md](LICENSE.md) for full terms.
+
+## Contact
+
+Steven Fett, Alaska DOT&PF — [steven.fett@alaska.gov](mailto:steven.fett@alaska.gov)
+Ryan Marlow, Alaska DOT&PF — [ryan.marlow@alaska.gov](mailto:ryan.marlow@alaska.gov)
+
 **Repository**: https://github.com/SFETTAK/Skybridge-Alaska
-
----
-
-*Built by Alaska DOT&PF using [Meshtastic](https://meshtastic.org) technology - proven, reliable, and specifically designed for situations where everything else fails.*

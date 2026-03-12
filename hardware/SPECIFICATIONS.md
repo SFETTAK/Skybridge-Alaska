@@ -1,120 +1,111 @@
 # Hardware Specifications
 
-## Universal IoT Board Design (Proposed)
+## Current Deployment: DOT-VHF Ground Station
 
-### Overview
-Dual-processor board supporting both Meshtastic mesh networking and complex edge computing for aviation applications.
+The operational ground station in Anchorage, Alaska.
 
-### Processors
-- **Primary**: nRF52840 (Nordic Semi)
-  - ARM Cortex-M4F @ 64MHz
-  - 1MB Flash, 256KB RAM
-  - Bluetooth 5.0 / 802.15.4
-  - Ultra-low power consumption
-  - Runs Meshtastic firmware
+### Compute
 
-- **Secondary**: RP2040 (Raspberry Pi)
-  - Dual ARM Cortex-M0+ @ 133MHz
-  - 2MB Flash (external)
-  - 264KB SRAM
-  - USB host capability
-  - Handles complex processing
+| Component | Specification | Est. Cost |
+|-----------|--------------|-----------|
+| Raspberry Pi 5 | 16 GB RAM, BCM2712 Cortex-A76, aarch64 | $80 |
+| MicroSD Card | 64 GB, boot drive | $12 |
+| Crucial P3 Plus NVMe | CT2000P3PSSD8, 2 TB, PCIe Gen4 | $120 |
+| Power Supply | Official USB-C 27W (5.1V/5A) | $12 |
+| Case | Active cooling fan enclosure | $10 |
+| Hailo-8 AI HAT+ | Present but disabled (NVMe takes M.2 priority) | $70 |
 
-### Communication
-- **LoRa Radio**: SX1262 or SX1276
-  - 902-928 MHz ISM band (US)
-  - +22dBm transmit power
-  - -148dBm sensitivity
-  - 50+ mile range at altitude
+### SDR Receivers
 
-### Sensor Interfaces
-- **12x I2C ports** (6 per processor)
-  - JST-SH 4-pin connectors
-  - 3.3V, GND, SDA, SCL
-  - Hot-swappable sensors
+| Device | Serial | Frequency | Role | Est. Cost |
+|--------|--------|-----------|------|-----------|
+| RTL-SDR Blog V4 | BLOGV4 | 118-137 MHz | VHF aviation (OpenWebRX + pipeline) | $35 |
+| RTL-SDR FlyCatcher | ADSB1090 | 1090 MHz | ADS-B Extended Squitter (readsb) | $30 |
+| RTL-SDR FlyCatcher | UAT978 | 978 MHz | UAT / FIS-B (dump978-fa) | $30 |
 
-### Supported Sensors
-- BME680: Temperature, humidity, pressure, gas
-- LIS3DH: 3-axis accelerometer
-- GPS: GNSS positioning
-- INA219: Voltage/current monitoring
-- Any I2C compatible sensor
+USB serial numbers are programmed into each dongle for persistent identification across reboots.
 
-### Power Management
-- **Input**: 6-30V (automotive/aviation)
-- **Battery**: 18650 Li-ion support
-- **Solar**: MPPT charging capability
-- **Consumption**: <2W average
+### Antennas
 
-### Physical
-- **Size**: 100x60mm (estimated)
-- **Mounting**: 4x M2.5 holes
-- **Enclosure**: IP67 capable
-- **Temperature**: -40°C to +85°C
+| Band | Type | Connected To | Est. Cost |
+|------|------|-------------|-----------|
+| VHF 118-137 MHz | Aviation band antenna | BLOGV4 | $25 |
+| 1090 MHz | ADS-B antenna | ADSB1090 | $20 |
+| 978 MHz | UAT antenna | UAT978 | $20 |
 
-### Connectivity
-- USB-C for programming/power
-- U.FL antenna connectors
-- Inter-processor: I2C/SPI/UART
-- MicroSD slot (optional)
+### Cost Summary
 
-### Cost Target
-- **Prototype**: $50-75
-- **Production (100+)**: $30-40
-- **Production (1000+)**: $20-25
+| Category | Cost |
+|----------|------|
+| Compute + storage | $304 |
+| SDR receivers (3x) | $95 |
+| Antennas (3x) | $65 |
+| Networking | $5 |
+| **Total deployed** | **~$470** |
 
-## Aircraft Node (Simplified)
+---
 
-### Minimum Viable Configuration
-- RAK4631 WisBlock Core
-- RAK19001 Base Board
-- RAK1906 BME680 Environment Sensor
-- GPS Module
-- External antenna
-- **Total Cost**: ~$50
+## Aircraft Node (Pilot Equipment)
+
+Off-the-shelf Meshtastic radio — no custom hardware required.
+
+| Component | Specification | Est. Cost |
+|-----------|--------------|-----------|
+| Meshtastic LoRa radio | 902-928 MHz ISM, any compatible device | $35-50 |
+| External antenna | 915 MHz, SMA connector | $15 |
+| **Total per aircraft** | | **~$50-65** |
 
 ### Installation
-1. Mount in avionics bay
-2. Connect to aircraft power (12V/24V)
-3. Route antenna to windshield/belly
-4. Pair with pilot's tablet via Bluetooth
+1. Plug radio into aircraft USB power (12V/24V via adapter)
+2. Pair with pilot's phone/tablet via Bluetooth
+3. Receive ground station data automatically
 
-## Ground Station
+No avionics bay mounting required. No FAA TSO certification needed (supplemental equipment only).
 
-### Enhanced Configuration
-- Dual-processor board (as above)
-- Weather station sensors
-- VHF SDR for voice monitoring (optional)
-- Ethernet/WiFi gateway
-- Solar panel + battery
-- High-gain antenna on mast
-- **Total Cost**: ~$500
+---
 
-### Deployment Locations (Priority)
-1. Remote airports without weather stations
-2. Mountain passes (Rainy Pass, Mystic Pass)
-3. High-traffic corridors
-4. Communities with active pilots
+## Ground Station Antenna Guidelines
 
-## Antenna Specifications
-
-### Aircraft
-- Type: 1/4 wave whip or dipole
+### VHF Aviation (118-137 MHz)
+- Type: Discone or broadband vertical
 - Gain: 2-3 dBi
-- Mounting: Magnetic or adhesive
+- Placement: Roof or mast, clear line of sight to runway/approach
 
-### Ground Station
-- Type: Collinear or Yagi
+### ADS-B / UAT (978/1090 MHz)
+- Type: Collinear vertical
+- Gain: 5-8 dBi
+- Placement: Highest available point, 20+ feet recommended
+
+### LoRa Mesh (902-928 MHz)
+- Type: Omnidirectional collinear or directional Yagi
 - Gain: 6-12 dBi
 - Height: 20+ feet recommended
+- For mountain repeaters: lightning protection required
 
-### Mountain Repeater
-- Type: Omnidirectional collinear
-- Gain: 6-9 dBi
-- Lightning protection required
+---
 
-## Certification Notes
+## Planned: Custom Hardware
 
-- FCC Part 15: ISM band operation
-- No FAA TSO required (supplemental equipment)
-- Recommend professional installation for permanent aircraft mounting
+The following custom board design has been explored but is **not in production**. The current deployment uses commercial off-the-shelf components (Raspberry Pi + RTL-SDR).
+
+### Proposed Dual-Processor IoT Board
+
+A compact board combining Meshtastic mesh networking with edge compute:
+
+- **Primary**: nRF52840 (Cortex-M4F, runs Meshtastic firmware)
+- **Secondary**: RP2040 (dual Cortex-M0+, handles sensor processing)
+- **Radio**: SX1262 LoRa (902-928 MHz, +22dBm, -148dBm sensitivity)
+- **Sensors**: 12x I2C ports (BME680, LIS3DH, GPS, INA219)
+- **Power**: 6-30V input, 18650 battery, MPPT solar, <2W average
+- **Physical**: 100x60mm, IP67 capable, -40C to +85C
+- **Cost target**: $50-75 prototype, $20-25 at 1000+ units
+
+This design is documented for future development if the project scales beyond Pi-based stations.
+
+---
+
+## Regulatory Notes
+
+- **FCC Part 15**: All radios operate in ISM bands, no license required
+- **FAA**: Supplemental information system only, not primary navigation
+- **No mandatory tracking**: Privacy by design, opt-in location sharing

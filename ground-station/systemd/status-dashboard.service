@@ -1,0 +1,15 @@
+[Unit]
+Description=DOT-VHF Station Status Dashboard
+After=readsb.service openwebrx.service
+
+[Service]
+Type=simple
+User=blastly
+ExecStart=/usr/bin/python3 /home/blastly/scripts/status-dashboard.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

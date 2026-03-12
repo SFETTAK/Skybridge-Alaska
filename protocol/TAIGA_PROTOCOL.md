@@ -1,5 +1,7 @@
 # TAIGA ASN.1 Protocol Integration
 
+> **Implementation Status:** TAIGA encoding is **planned but not yet deployed**. The current DOT-VHF ground station transmits plain text transcripts over Meshtastic. TAIGA integration is targeted for Phase 2, when structured aviation data (METARs, PIREPs, NOTAMs) is added to the mesh network.
+
 ## Overview
 The TAIGA (Traffic and Atmospheric Information for General Aviation) protocol was developed by NASA Ames Research Center (Joseph L. Rios) specifically for efficient aviation data transmission in bandwidth-limited environments like Alaska.
 
@@ -128,20 +130,6 @@ Meshtastic channels can be configured for TAIGA payloads:
 channel.psk = generate_psk("skybridge-alaska")
 channel.compression = CompressionType.NONE  # TAIGA handles compression
 channel.data_rate = ChannelSettings.DataRate.LONG_SLOW  # Max range
-```
-
-## Testing Tools
-
-### Encoder Test
-```bash
-python tools/taiga_encoder.py --input weather.txt --output weather.bin
-# Compression ratio: 0.19 (81% savings)
-```
-
-### Range Calculator
-```bash
-python tools/range_calc.py --power 22 --data-size 20 --terrain mountain
-# Estimated range: 47 miles at 10,000ft AGL
 ```
 
 ## License Note
