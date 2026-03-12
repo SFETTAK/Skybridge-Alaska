@@ -8,7 +8,7 @@ User=blastly
 # Before first reboot: device=1 by index. After reboot: serial=UAT978 takes effect.
 # Post-reboot the service will find it by serial automatically.
 ExecStart=/usr/local/bin/dump978-fa \
-    --sdr driver=rtlsdr,device=1 \
+    --sdr driver=rtlsdr,serial=UAT978 \
     --sdr-auto-gain \
     --json-port 30978
 Restart=on-failure

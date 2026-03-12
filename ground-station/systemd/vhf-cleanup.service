@@ -1,0 +1,7 @@
+[Unit]
+Description=VHF audio cleanup (prune oldest when >1TB)
+
+[Service]
+Type=oneshot
+User=blastly
+ExecStart=/home/blastly/scripts/vhf-cleanup.sh

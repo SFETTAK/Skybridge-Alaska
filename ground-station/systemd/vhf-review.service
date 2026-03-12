@@ -1,0 +1,15 @@
+[Unit]
+Description=VHF Review Web UI (SkyBridge Alaska)
+After=network.target
+
+[Service]
+Type=simple
+User=blastly
+ExecStart=/home/blastly/vhf-pipeline-venv/bin/python /home/blastly/scripts/vhf-review.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

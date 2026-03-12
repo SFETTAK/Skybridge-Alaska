@@ -1,6 +1,7 @@
 [Unit]
 Description=OpenWebRX WebSDR receiver (DOT-VHF)
-After=network.target
+After=network.target readsb.service dump978-fa.service
+ExecStartPre=/bin/sleep 3
 
 [Service]
 Type=simple
