@@ -1,8 +1,14 @@
 # SkyBridge Alaska
 
-**Aviation safety mesh network for general aviation in Alaska.**
+**Low-cost aviation safety network for general aviation in Alaska.**
 
-SkyBridge is a system built by Alaska DOT&PF that captures VHF aviation radio, ADS-B aircraft transponders, and UAT weather data using low-cost software-defined radios, transcribes pilot voice communications with AI, and distributes critical flight information over a Meshtastic LoRa mesh network — no cell towers or satellites required.
+Alaska pilots are **36x more likely to die** than the average US worker. Eighty percent of the state has no reliable weather updates, no VHF radio coverage, and terrain maps with errors up to 263 feet. Traditional ground-station infrastructure costs $200K+ per site. SkyBridge changes the math.
+
+A single **$470 Raspberry Pi ground station** with three $30 SDR dongles captures every VHF radio transmission on the airfield, decodes ADS-B traffic from 100+ aircraft across 500 nautical miles, pulls live weather from NOAA and automated camera stations, transcribes pilot/ATC voice with AI — and delivers it all to a **free, GPS-enabled moving map on any pilot's tablet**. No subscriptions. No cell towers. No satellites required.
+
+When connected to a **$50 Meshtastic LoRa radio**, the same data reaches pilots over a self-healing mesh network with 50+ mile range at altitude — peer-to-peer, off-grid, and encrypted.
+
+**Alaska DOT&PF is deploying it now.**
 
 ![Aviation Mesh Network](docs/SDR-Mesh-GeneralAviation.png)
 
