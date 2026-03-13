@@ -72,7 +72,7 @@ def api_recordings():
                         pass
 
     # List FLAC files
-    files = sorted(glob.glob(os.path.join(date_dir, "*.flac")))
+    files = glob.glob(os.path.join(date_dir, "*.flac"))
     recordings = []
     for fpath in files:
         fname = os.path.basename(fpath)
@@ -99,6 +99,8 @@ def api_recordings():
             "transcript": transcript.get("text", ""),
         })
 
+    # Sort by time — newest first
+    recordings.sort(key=lambda r: r["time_key"], reverse=True)
     return jsonify(recordings)
 
 

@@ -15,8 +15,8 @@ WHISPER_PROMPT_PANC = (
     "Anchorage Tower, Anchorage Ground, Anchorage Approach, Anchorage Departure, "
     "Anchorage Center, Anchorage Clearance, Ted Stevens Tower, "
     # Runways at PANC
-    "runway seven left, runway seven right, runway two-five left, runway two-five right, "
-    "runway one-five, runway three-three, "
+    "runway seven left, runway seven right, runway two five left, runway two five right, "
+    "runway one five, runway three three, "
     # Taxiways at PANC
     "taxi via Alpha, taxi via Bravo, taxi via Charlie, taxi via Delta, "
     "taxi via Echo, taxi via Foxtrot, taxi via Golf, taxi via Hotel, "
@@ -25,29 +25,46 @@ WHISPER_PROMPT_PANC = (
     # Common ATC commands
     "cleared to land, cleared for takeoff, cleared for the option, "
     "line up and wait, position and hold, "
-    "contact Tower, contact Ground, contact Approach, contact Departure, contact Center, "
-    "squawk, ident, say again, say altitude, say airspeed, "
-    "turn left heading, turn right heading, fly heading, "
-    "climb and maintain, descend and maintain, maintain, "
-    "flight level, angels, "
+    "contact Tower one one eight point six, contact Ground one two one point niner, "
+    "contact Approach one two four point two, contact Departure, contact Center, "
+    "squawk one two zero zero, squawk four five one two, ident, "
+    "say again, say altitude, say airspeed, say heading, "
+    "turn left heading two seven zero, turn right heading three six zero, fly heading, "
+    "climb and maintain one zero thousand, descend and maintain six thousand, "
+    "maintain two five zero knots, reduce speed to one eight zero, "
+    "flight level three five zero, flight level two four zero, "
     "roger, wilco, affirmative, negative, unable, "
-    "traffic, caution wake turbulence, wind shear, go around, "
+    "traffic twelve o'clock five miles, caution wake turbulence, wind shear, go around, "
+    # Tail numbers (N-numbers)
+    "November seven three four Charlie Bravo, November five two one Alpha Sierra, "
+    "November eight four six Papa, November one two three four five, "
     # Phonetic alphabet
     "Alpha, Bravo, Charlie, Delta, Echo, Foxtrot, Golf, Hotel, "
     "India, Juliet, Kilo, Lima, Mike, November, Oscar, Papa, "
     "Quebec, Romeo, Sierra, Tango, Uniform, Victor, Whiskey, X-ray, Yankee, Zulu, "
-    # Number pronunciation
-    "zero, one, two, three, four, five, six, seven, eight, niner, "
-    "hundred, thousand, flight level, point, decimal, "
+    # Number pronunciation — how pilots say digits
+    "zero, one, two, three, four, fife, six, seven, eight, niner, "
+    "hundred, thousand, point, decimal, "
+    # Altitude examples
+    "one zero thousand, one one thousand, one two thousand, "
+    "three thousand, four thousand five hundred, "
+    # Heading examples
+    "heading zero niner zero, heading one eight zero, heading two seven zero, heading three six zero, "
+    # Speed examples
+    "speed two five zero, speed one eight zero knots, "
+    # Altimeter examples
+    "altimeter two niner niner two, altimeter three zero one five, "
     # Common airlines at ANC
-    "Alaska seven, Alaska one-five, United, Delta, FedEx, UPS, "
-    "Polar, Atlas, Northern Pacific, Ravn, Everts, Era, "
-    "November seven-three-four Charlie Bravo, "
+    "Alaska five two seven, Alaska two three, Alaska seven six, "
+    "United, Delta, FedEx heavy, UPS heavy, "
+    "Polar one two, Atlas four five, Northern Pacific, Ravn, Everts, Era, "
     # Fixes/waypoints near ANC
     "PRIOR, PRIOR intersection, LULIE, TEDDY, ELLAM, BRILL, "
-    "Merrill Field, Lake Hood, Elmendorf, "
+    "direct PRIOR, direct BRILL, "
+    "Merrill Field, Lake Hood, Elmendorf, Joint Base, "
     # ATIS/weather
-    "information Alpha, information Bravo, altimeter, wind, visibility, ceiling, "
+    "information Alpha, information Bravo, information Charlie, "
+    "wind two one zero at one five, visibility one zero, ceiling three thousand broken, "
     "VFR, IFR, MVFR, LIFR"
 )
 
@@ -227,6 +244,173 @@ def _normalize_frequency(text):
     )
 
 
+def _normalize_tail_number(text):
+    """Convert 'November seven three four Charlie Bravo' → 'N734CB'."""
+    _PHONETIC_TO_LETTER = {
+        'alpha': 'A', 'bravo': 'B', 'charlie': 'C', 'delta': 'D',
+        'echo': 'E', 'foxtrot': 'F', 'golf': 'G', 'hotel': 'H',
+        'india': 'I', 'juliet': 'J', 'kilo': 'K', 'lima': 'L',
+        'mike': 'M', 'november': 'N', 'oscar': 'O', 'papa': 'P',
+        'quebec': 'Q', 'romeo': 'R', 'sierra': 'S', 'tango': 'T',
+        'uniform': 'U', 'victor': 'V', 'whiskey': 'W', 'x-ray': 'X',
+        'xray': 'X', 'yankee': 'Y', 'zulu': 'Z',
+    }
+    all_words = '|'.join(list(_SPOKEN_TO_DIGIT.keys()) + list(_PHONETIC_TO_LETTER.keys()))
+
+    def replace_tail(m):
+        words = m.group(1).split()
+        result = 'N'
+        for w in words:
+            wl = w.lower()
+            if wl in _SPOKEN_TO_DIGIT:
+                result += _SPOKEN_TO_DIGIT[wl]
+            elif wl in _PHONETIC_TO_LETTER:
+                result += _PHONETIC_TO_LETTER[wl]
+            else:
+                result += w
+        trail = m.group(2) or ''
+        return result + trail
+
+    return re.sub(
+        r'November\s+((?:(?:' + all_words + r')\s+){2,5}(?:' + all_words + r'))(\s|$|[,.])',
+        replace_tail, text, flags=re.IGNORECASE
+    )
+
+
+def _normalize_speed(text):
+    """Convert 'speed two five zero' → 'speed 250'."""
+    def replace_speed(m):
+        prefix = m.group(1)
+        words = m.group(2).split()
+        digits = ''.join(_SPOKEN_TO_DIGIT.get(w.lower(), w) for w in words)
+        trail = m.group(3) or ''
+        return f"{prefix} {digits}{trail}"
+    digit_pat = '|'.join(_SPOKEN_TO_DIGIT.keys())
+    return re.sub(
+        r'(speed\s*(?:to\s*)?|knots?\s+)((?:(?:' + digit_pat + r')\s+){1,2}(?:' + digit_pat + r'))(\s|$|[,.])',
+        replace_speed, text, flags=re.IGNORECASE
+    )
+
+
+def _normalize_altitude_thousands(text):
+    """Convert 'one zero thousand' → '10,000', 'four thousand five hundred' → '4,500'."""
+    digit_pat = '|'.join(_SPOKEN_TO_DIGIT.keys())
+
+    # "one zero thousand" / "one one thousand" etc.
+    def replace_ten_thousands(m):
+        prefix = m.group(1)
+        words = m.group(2).split()
+        digits = ''.join(_SPOKEN_TO_DIGIT.get(w.lower(), w) for w in words)
+        trail = m.group(3) or ''
+        return f"{prefix} {digits},000{trail}"
+    text = re.sub(
+        r'(maintain|climb and maintain|descend and maintain|at)\s+((?:(?:' + digit_pat + r')\s+){1,2}(?:' + digit_pat + r'))\s+thousand(\s|$|[,.])',
+        replace_ten_thousands, text, flags=re.IGNORECASE
+    )
+
+    # "four thousand five hundred"
+    def replace_x_thousand_y_hundred(m):
+        prefix = m.group(1)
+        tdig = _SPOKEN_TO_DIGIT.get(m.group(2).lower(), m.group(2))
+        hdig = _SPOKEN_TO_DIGIT.get(m.group(3).lower(), m.group(3))
+        trail = m.group(4) or ''
+        return f"{prefix} {tdig},{hdig}00{trail}"
+    text = re.sub(
+        r'(maintain|climb and maintain|descend and maintain|at)\s+(' + digit_pat + r')\s+thousand\s+(' + digit_pat + r')\s+hundred(\s|$|[,.])',
+        replace_x_thousand_y_hundred, text, flags=re.IGNORECASE
+    )
+
+    # Simple "X thousand" — "four thousand"
+    def replace_simple_thousand(m):
+        prefix = m.group(1)
+        tdig = _SPOKEN_TO_DIGIT.get(m.group(2).lower(), m.group(2))
+        trail = m.group(3) or ''
+        return f"{prefix} {tdig},000{trail}"
+    text = re.sub(
+        r'(maintain|climb and maintain|descend and maintain|at)\s+(' + digit_pat + r')\s+thousand(\s|$|[,.])',
+        replace_simple_thousand, text, flags=re.IGNORECASE
+    )
+
+    return text
+
+
+def _normalize_runway(text):
+    """Convert 'runway seven left' → 'runway 7L', 'runway two five right' → 'runway 25R'."""
+    _RWY_SUFFIX = {'left': 'L', 'right': 'R', 'center': 'C'}
+    digit_pat = '|'.join(_SPOKEN_TO_DIGIT.keys())
+
+    def replace_rwy(m):
+        words = m.group(1).split()
+        digits = ''.join(_SPOKEN_TO_DIGIT.get(w.lower(), w) for w in words)
+        suffix = _RWY_SUFFIX.get(m.group(2).lower(), '') if m.group(2) else ''
+        trail = m.group(3) or ''
+        return f"runway {digits}{suffix}{trail}"
+
+    return re.sub(
+        r'runway\s+((?:(?:' + digit_pat + r')\s+){0,1}(?:' + digit_pat + r'))\s*(?:(left|right|center))?(\s|$|[,.])',
+        replace_rwy, text, flags=re.IGNORECASE
+    )
+
+
+def _normalize_callsign(text):
+    """Convert 'Alaska five two seven' → 'Alaska 527'."""
+    _AIRLINES = [
+        'Alaska', 'United', 'Delta', 'FedEx', 'UPS', 'Polar', 'Atlas',
+        'Ravn', 'Everts', 'Era', 'Cargolux', 'Korean', 'Nippon',
+    ]
+    digit_pat = '|'.join(_SPOKEN_TO_DIGIT.keys())
+    airline_pat = '|'.join(_AIRLINES)
+
+    def replace_callsign(m):
+        airline = m.group(1)
+        words = m.group(2).split()
+        digits = ''.join(_SPOKEN_TO_DIGIT.get(w.lower(), w) for w in words)
+        # Add "heavy"/"super" suffix if present
+        suffix = m.group(3) or ''
+        trail = m.group(4) or ''
+        return f"{airline} {digits}{suffix}{trail}"
+
+    return re.sub(
+        r'(' + airline_pat + r')\s+((?:(?:' + digit_pat + r')\s+){0,3}(?:' + digit_pat + r'))(\s+(?:heavy|super))?(\s|$|[,.])',
+        replace_callsign, text, flags=re.IGNORECASE
+    )
+
+
+def _normalize_altimeter(text):
+    """Convert 'altimeter two niner niner two' → 'altimeter 29.92'."""
+    digit_pat = '|'.join(_SPOKEN_TO_DIGIT.keys())
+
+    def replace_altimeter(m):
+        words = m.group(1).split()
+        digits = ''.join(_SPOKEN_TO_DIGIT.get(w.lower(), w) for w in words)
+        trail = m.group(2) or ''
+        if len(digits) == 4:
+            return f"altimeter {digits[:2]}.{digits[2:]}{trail}"
+        return f"altimeter {digits}{trail}"
+
+    return re.sub(
+        r'altimeter\s+((?:(?:' + digit_pat + r')\s+){3}(?:' + digit_pat + r'))(\s|$|[,.])',
+        replace_altimeter, text, flags=re.IGNORECASE
+    )
+
+
+def _normalize_traffic(text):
+    """Convert 'traffic twelve o'clock five miles' → 'traffic 12 o\'clock 5 miles'."""
+    _SPOKEN_NUMBERS = {
+        'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
+        'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
+        'eleven': '11', 'twelve': '12',
+    }
+    def replace_clock(m):
+        num = _SPOKEN_NUMBERS.get(m.group(1).lower(), m.group(1))
+        return f"traffic {num} o'clock"
+    text = re.sub(
+        r"traffic\s+(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+o'?\s*clock",
+        replace_clock, text, flags=re.IGNORECASE
+    )
+    return text
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # JUNK FILTER — detect and discard hallucinated nonsense
 # ─────────────────────────────────────────────────────────────────────────────
@@ -257,6 +441,10 @@ _ATC_KEYWORDS = {
     'heavy', 'super', 'alaska', 'united', 'fedex', 'polar',
     'wind', 'visibility', 'ceiling', 'altimeter', 'atis',
     'information', 'copy', 'frequency', 'point', 'decimal',
+    'speed', 'knots', 'miles', 'clock', 'report', 'say',
+    'reduce', 'increase', 'expect', 'vectors', 'proceed',
+    'identified', 'radar', 'handoff', 'approved', 'request',
+    'clearance', 'readback', 'correction', 'disregard',
 }
 
 
@@ -302,10 +490,17 @@ def post_process(text, min_relevance=0.1):
         text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
 
     # Step 4: Normalize numbers
+    text = _normalize_tail_number(text)
+    text = _normalize_callsign(text)
+    text = _normalize_runway(text)
     text = _normalize_squawk(text)
     text = _normalize_heading(text)
     text = _normalize_altitude(text)
+    text = _normalize_altitude_thousands(text)
+    text = _normalize_speed(text)
     text = _normalize_frequency(text)
+    text = _normalize_altimeter(text)
+    text = _normalize_traffic(text)
 
     # Step 5: Clean up whitespace
     text = re.sub(r'\s+', ' ', text).strip()

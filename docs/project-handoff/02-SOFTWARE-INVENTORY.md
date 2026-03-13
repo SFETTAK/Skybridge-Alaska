@@ -18,7 +18,11 @@
 
 | Script | Size | Purpose |
 |--------|------|---------|
-| `vhf-pipeline.py` | 15 KB | Core pipeline: RTL-TCP IQ → AM demod → VAD → FLAC archive → Whisper STT → Meshtastic publish |
+| `vhf-pipeline.py` | 18 KB | Core pipeline: RTL-TCP IQ → channelized AM demod → adaptive squelch → speech quality gate → FLAC archive → Whisper STT → ADS-B correlation → Meshtastic publish |
+| `aviation_lexicon.py` | 14 KB | ATC vocabulary corrections: Whisper prompt (PANC-tuned), phonetic fixes, ATC command normalization, 11 number normalizers (squawk, heading, altitude, FL, frequency, tail number, speed, altitude thousands, runway, callsign, altimeter, traffic), hallucination filter, relevance scorer |
+| `kneeboard.py` | 38 KB | Pilot-facing kneeboard web app: 12-layer Leaflet moving map, ADS-B traffic (local + ADSB.fi), weather overlays (METAR, SIGMET, PIREP, G-AIRMET, volcanic ash, NWS alerts), MWOS stations (Montis Corp API), VHF transcript feed, GPS tracking. Port 8083 / HTTPS 8443 |
+| `adsb-combine.py` | 4 KB | Merges local readsb ADS-B with ADSB.fi statewide feed (two 250nm circles). Writes combined aircraft.json to /run/combine1090/ every 8 seconds for tar1090-combo |
+| `vhf-review.py` | 12 KB | Web UI for browsing archived VHF audio segments and transcripts. FLAC→WAV conversion, waveform display, date/search filtering. Port 8082 |
 | `test-pipeline.py` | 16 KB | 17-test validation harness for vhf-pipeline (runs without SDR hardware) |
 | `status-dashboard.py` | 8.6 KB | Generates live HTML status dashboard every 30 seconds |
 | `nvme-backup.sh` | 1.2 KB | rclone sync of NVMe data to central backup server |
@@ -101,6 +105,9 @@ av                16.1.0
 | dump978-fa | /usr/local/bin/dump978-fa (device=1, port 30978) | blastly | active |
 | skyaware978 | /usr/local/bin/skyaware978 (127.0.0.1:30978) | blastly | active |
 | tar1090 | /usr/local/share/tar1090/tar1090.sh | tar1090 | active |
+| tar1090-combo | /usr/local/share/tar1090/tar1090.sh /run/tar1090-combo /run/combine1090 | tar1090 | active |
+| adsb-combine | ~/vhf-pipeline-venv/bin/python ~/scripts/adsb-combine.py | root | active |
+| kneeboard | ~/vhf-pipeline-venv/bin/python ~/scripts/kneeboard.py | blastly | active |
 | status-dashboard | /usr/bin/python3 ~/scripts/status-dashboard.py | blastly | active |
 | lighttpd | system lighttpd | www-data | active |
 | vhf-pipeline | ~/vhf-pipeline-venv/bin/python ~/scripts/vhf-pipeline.py | blastly | enabled, inactive |
@@ -123,8 +130,12 @@ av                16.1.0
 | Service | URL | Purpose |
 |---------|-----|---------|
 | OpenWebRX | http://192.168.1.81:8073 | SDR spectrum viewer and VHF tuning |
-| tar1090 | http://192.168.1.81:8504 | ADS-B aircraft tracking map |
 | Status Dashboard | http://192.168.1.81:8080 | Station health and metrics |
+| VHF Review | http://192.168.1.81:8082 | Audio/transcript browser |
+| Kneeboard | https://192.168.1.81:8443 | Pilot kneeboard (12-layer map, GPS) |
+| tar1090 (local) | http://192.168.1.81:8504 | ADS-B map (local receiver only) |
+| tar1090-combo | http://192.168.1.81:8505 | ADS-B map (local + ADSB.fi statewide) |
+| tar1090-combo (HTTPS) | https://192.168.1.81:8506 | ADS-B map combined (GPS-enabled) |
 
 ## 12. Network Ports
 
@@ -133,10 +144,33 @@ av                16.1.0
 | 1235 | TCP | rtl_tcp (OpenWebRX compat) | internal |
 | 8073 | HTTP | OpenWebRX | LAN |
 | 8080 | HTTP | lighttpd (dashboard) | LAN |
-| 8504 | HTTP | tar1090 | LAN |
+| 8082 | HTTP | vhf-review | LAN |
+| 8083 | HTTP | kneeboard (Flask, internal) | internal |
+| 8443 | HTTPS | kneeboard (lighttpd SSL proxy) | LAN |
+| 8504 | HTTP | tar1090 (local) | LAN |
+| 8505 | HTTP | tar1090-combo | LAN |
+| 8506 | HTTPS | tar1090-combo (SSL) | LAN |
 | 30001 | TCP | readsb raw input | internal |
 | 30002 | TCP | readsb raw output | internal |
 | 30003 | TCP | readsb SBS (BaseStation) | internal |
 | 30004 | TCP | readsb Beast input | internal |
 | 30005 | TCP | readsb Beast output | internal |
 | 30978 | TCP | dump978-fa JSON | internal |
+
+## 13. HTTPS / SSL
+
+Self-signed certificates enable browser GPS geolocation on LAN endpoints.
+
+| Component | Certificate | Ports |
+|-----------|-------------|-------|
+| Kneeboard | /etc/lighttpd/certs/server.pem | 8443 (reverse proxy to Flask :8083) |
+| tar1090-combo | /etc/lighttpd/certs/server.pem | 8506 (static file serving) |
+
+## 14. External API Dependencies
+
+| API | Used By | Purpose | Rate Limit |
+|-----|---------|---------|------------|
+| ADSB.fi opendata | adsb-combine.py, kneeboard.py | Statewide ADS-B positions | 10s between requests |
+| aviationweather.gov | kneeboard.py | METAR, TAF, SIGMET, AIRMET, G-AIRMET, PIREP, volcanic ash | Cached 5 min |
+| api.weather.gov | kneeboard.py | NWS active alerts for Alaska | Cached 5 min |
+| Montis Corp MWOS | kneeboard.py | Automated weather stations + cameras | Cached 5 min |

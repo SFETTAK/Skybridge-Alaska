@@ -1,0 +1,15 @@
+[Unit]
+Description=SkyBridge ADS-B Combiner (local + ADSB.fi)
+After=network-online.target readsb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStartPre=/bin/mkdir -p /run/combine1090
+ExecStart=/home/blastly/vhf-pipeline-venv/bin/python /home/blastly/scripts/adsb-combine.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

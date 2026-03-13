@@ -1,0 +1,19 @@
+[Unit]
+Description=tar1090 Combined View (local + ADSB.fi)
+After=adsb-combine.service
+Requires=adsb-combine.service
+
+[Service]
+User=tar1090
+RuntimeDirectory=tar1090-combo
+RuntimeDirectoryPreserve=yes
+EnvironmentFile=/etc/default/tar1090-combo
+ExecStart=/bin/bash /usr/local/share/tar1090/tar1090.sh /run/tar1090-combo /run/combine1090
+Type=simple
+Restart=always
+RestartSec=30
+Nice=19
+LimitCORE=0
+
+[Install]
+WantedBy=multi-user.target

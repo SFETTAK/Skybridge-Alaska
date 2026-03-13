@@ -1,0 +1,15 @@
+[Unit]
+Description=SkyBridge Kneeboard Web App
+After=network.target vhf-pipeline.service
+
+[Service]
+Type=simple
+User=blastly
+ExecStart=/home/blastly/vhf-pipeline-venv/bin/python /home/blastly/scripts/kneeboard.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

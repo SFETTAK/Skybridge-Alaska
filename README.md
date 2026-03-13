@@ -17,12 +17,18 @@ Skybridge-Alaska/
 |
 |-- ground-station/          <-- Deployed code running on DOT-VHF (Raspberry Pi 5)
 |   |-- scripts/
-|   |   |-- vhf-pipeline.py        VHF radio -> AM demod -> Whisper STT -> Meshtastic
+|   |   |-- vhf-pipeline.py        VHF radio -> channelized AM demod -> adaptive squelch
+|   |   |                           -> Whisper STT -> ADS-B correlation -> Meshtastic
+|   |   |-- aviation_lexicon.py    ATC vocabulary corrections + 11 number normalizers
+|   |   |-- kneeboard.py           Pilot kneeboard: 12-layer moving map with ADS-B,
+|   |   |                           weather, VHF transcripts, MWOS cameras
+|   |   |-- adsb-combine.py        Merges local readsb + ADSB.fi statewide feed
+|   |   |-- vhf-review.py          Web UI for archived VHF audio + transcripts
 |   |   |-- test-pipeline.py       17-test validation suite (runs without hardware)
 |   |   |-- status-dashboard.py    Live HTML station health dashboard
 |   |   +-- nvme-backup.sh         Automated rclone backup to central server
-|   |-- systemd/                   All service and timer unit files
-|   +-- config/                    OpenWebRX, readsb, tar1090, SSH, fail2ban configs
+|   |-- systemd/                   13 service/timer unit files
+|   +-- config/                    OpenWebRX, readsb, tar1090, SSL, lighttpd configs
 |
 |-- docs/
 |   |-- project-handoff/     <-- Full project documentation package
@@ -64,33 +70,51 @@ The first deployed ground station, running on a Raspberry Pi 5 in Anchorage, Ala
 
 **VHF Voice Pipeline** (`ground-station/scripts/vhf-pipeline.py`)
 1. Receives IQ samples from RTL-SDR via OpenWebRX's rtl_tcp interface
-2. Demodulates AM aviation audio (centered on 121.8 MHz guard/unicom)
-3. Detects voice transmissions with energy-based VAD
-4. Archives voice segments as FLAC to NVMe
-5. Transcribes speech using Whisper (faster-whisper, tiny.en model, CPU)
-6. Publishes transcripts to Meshtastic mesh network
-7. Logs all transcripts to NVMe for historical record
+2. Channelized AM demodulation: freq shift, LPF, decimate 2.4M to 16kHz (Whisper-native)
+3. Adaptive squelch: auto-calibrating noise floor, 8 dB SNR threshold, EMA tracking
+4. Speech quality gate: peak/mean ratio + energy variance rejects noise segments
+5. Archives voice segments as FLAC to NVMe
+6. Transcribes with Whisper base.en (faster-whisper, CPU int8), PANC-tuned prompt
+7. Post-processes with aviation_lexicon.py: phonetic fixes, ATC corrections, 11 number normalizers, hallucination filter
+8. Correlates callsigns against live ADS-B — annotates transcripts with aircraft position
+9. Publishes to Meshtastic mesh network + logs to NVMe
 
 **ADS-B Tracking**
 - 1090 MHz Extended Squitter via readsb with globe-history archival
 - 978 MHz UAT via dump978-fa for GA traffic and FIS-B weather
-- Web map at tar1090 combining both feeds
+- tar1090 local map (receiver-only, port 8504)
+- **adsb-combine.py** merges local readsb + ADSB.fi statewide feed (two 250nm circles covering 500nm of Alaska)
+- **tar1090-combo** serves the merged view (port 8505 HTTP, 8506 HTTPS with GPS)
+
+**Pilot Kneeboard** (`ground-station/scripts/kneeboard.py`)
+- Tablet-optimized 12-layer moving map designed for cockpit use
+- ADS-B traffic (local + statewide), VHF transcripts, weather overlays
+- METAR dots (30 stations), SIGMETs/AIRMETs, PIREPs, G-AIRMETs, volcanic ash, NWS alerts
+- MWOS automated weather stations with camera images (Montis Corp API)
+- GPS tracking via HTTPS (self-signed cert on port 8443)
 
 **Station Monitoring**
 - Live status dashboard showing service health, NVMe SMART, aircraft count, latest transcripts
+- VHF Review web UI for browsing archived audio and transcripts (port 8082)
 - Automated backup to central server every 6 hours via rclone
 - Log rotation, NVMe health checks
 
-### Services Running
+### Services Running (13)
 
 | Service | Port | Purpose |
 |---------|------|---------|
 | OpenWebRX | 8073 | Web SDR spectrum viewer |
-| tar1090 | 8504 | ADS-B aircraft tracking map |
 | Status Dashboard | 8080 | Station health metrics |
-| readsb | 30002-30005 | ADS-B decoder (network feeds) |
-| dump978-fa | 30978 | UAT decoder |
-| vhf-pipeline | — | VHF transcription (background) |
+| VHF Review | 8082 | Audio/transcript browser |
+| Kneeboard | 8443 (HTTPS) | Pilot 12-layer moving map |
+| tar1090 | 8504 | ADS-B map (local receiver) |
+| tar1090-combo | 8505 / 8506 (HTTPS) | ADS-B map (local + statewide) |
+| readsb | 30002-30005 | ADS-B 1090 decoder |
+| dump978-fa | 30978 | UAT 978 decoder |
+| adsb-combine | -- | ADS-B feed merger (background) |
+| vhf-pipeline | -- | VHF transcription (background) |
+| lighttpd | -- | Web server / HTTPS proxy |
+| nvme-backup | -- | rclone sync every 6 hours |
 
 ---
 
@@ -109,14 +133,33 @@ SkyBridge addresses this with a **$50-per-pilot mesh network** backed by AI-powe
 - **Protocol**: NASA TAIGA ASN.1 for 80% data compression
 - **Platform**: Raspberry Pi 5 + NVMe, all open source
 
+## Current Status (March 2026)
+
+The DOT-VHF ground station is fully operational in Anchorage with 13 services running on a Raspberry Pi 5. Key capabilities deployed and working:
+
+- VHF voice pipeline with adaptive squelch, speech quality gating, and ADS-B-correlated transcripts
+- Aviation lexicon post-processor with 11 number normalizers tuned for PANC ATC
+- Statewide ADS-B coverage merging local RTL-SDR receiver with ADSB.fi (500nm, ~100-200 aircraft)
+- Pilot kneeboard web app with 12 map layers including weather, traffic, MWOS cameras, and VHF transcripts
+- VHF audio review interface for browsing archived recordings and transcripts
+- HTTPS endpoints with GPS tracking for cockpit tablet use
+- Automated NVMe archival and remote backup
+
 ## Project Status
 
 | Milestone | Status |
 |-----------|--------|
 | Ground station hardware deployed | Done |
-| VHF pipeline (demod + VAD + archive) | Done |
-| Whisper STT integration | Done |
-| ADS-B 1090 + 978 UAT tracking | Done |
+| VHF pipeline (channelized demod + adaptive squelch + archive) | Done |
+| Whisper STT with aviation lexicon post-processing | Done |
+| ADS-B correlation (callsign extraction + position annotation) | Done |
+| ADS-B 1090 + 978 UAT tracking (local) | Done |
+| ADSB.fi statewide feed integration (500nm coverage) | Done |
+| tar1090-combo merged ADS-B map | Done |
+| Pilot kneeboard (12-layer moving map) | Done |
+| MWOS weather station integration (Montis Corp) | Done |
+| VHF review web UI | Done |
+| HTTPS/GPS support for cockpit tablets | Done |
 | Status dashboard + monitoring | Done |
 | NVMe archival + backup automation | Done |
 | Test suite (17 tests, no hardware needed) | Done |
@@ -134,20 +177,29 @@ See the [Operational Runbook](docs/project-handoff/05-OPERATIONAL-RUNBOOK.md) fo
 ssh blastly@192.168.1.81
 
 # Check all services
-systemctl status openwebrx readsb dump978-fa tar1090 status-dashboard vhf-pipeline
+systemctl status openwebrx readsb dump978-fa tar1090 tar1090-combo \
+  adsb-combine kneeboard status-dashboard vhf-pipeline lighttpd
 
 # Run the test suite (no hardware needed)
 source ~/vhf-pipeline-venv/bin/activate
 python ~/scripts/test-pipeline.py
 
-# View live dashboard
-open http://192.168.1.81:8080
+# View live interfaces
+open http://192.168.1.81:8080      # Status dashboard
+open http://192.168.1.81:8082      # VHF review
+open https://192.168.1.81:8443     # Pilot kneeboard (GPS)
+open http://192.168.1.81:8504      # ADS-B map (local)
+open https://192.168.1.81:8506     # ADS-B map (statewide + GPS)
+open http://192.168.1.81:8073      # OpenWebRX SDR
 ```
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
+| [Ground Station README](ground-station/README.md) | Service inventory, port map, HTTPS/GPS setup |
+| [Kneeboard Guide](docs/kneeboard-guide.md) | 12-layer map, API endpoints, MWOS integration |
+| [ADS-B Integration](docs/adsb-integration.md) | Local + ADSB.fi merge architecture, tar1090-combo |
 | [Hardware Inventory](docs/project-handoff/01-HARDWARE-INVENTORY.md) | Every component, serial number, and cost |
 | [Software Inventory](docs/project-handoff/02-SOFTWARE-INVENTORY.md) | All services, packages, and versions |
 | [System Architecture](docs/project-handoff/03-SYSTEM-ARCHITECTURE.md) | Data flow diagrams and service dependencies |

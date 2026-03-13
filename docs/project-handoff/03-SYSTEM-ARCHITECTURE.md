@@ -46,6 +46,20 @@ DOT-VHF is a multi-band aviation ground station built on a Raspberry Pi 5. It si
      │  └─────────────────────┘  │
      │                           │
      │  ┌─────────────────────┐  │
+     │  │  adsb-combine.py    │  │  ← Merges readsb + ADSB.fi
+     │  │  /run/combine1090/  │──┼──→ tar1090-combo (:8505/:8506)
+     │  └─────────────────────┘  │
+     │                           │
+     │  ┌─────────────────────┐  │
+     │  │  Kneeboard          │  │  ← 12-layer pilot moving map
+     │  │  Flask (:8083)      │──┼──→ lighttpd HTTPS (:8443)
+     │  └─────────────────────┘  │
+     │                           │
+     │  ┌─────────────────────┐  │
+     │  │  VHF Review         │──┼──→ Audio browser (:8082)
+     │  └─────────────────────┘  │
+     │                           │
+     │  ┌─────────────────────┐  │
      │  │  Status Dashboard   │──┼──→ lighttpd (:8080)
      │  └─────────────────────┘  │
      │                           │
@@ -71,44 +85,70 @@ RTL-SDR (BLOGV4)
     ▼ IQ samples (2.4 MSps, uint8)
 OpenWebRX rtl_tcp (:1235)
     │
-    ▼ TCP stream
+    ▼ TCP stream (960KB per 0.1s chunk)
 vhf-pipeline.py: RtlTcpClient
     │
-    ▼ 480K IQ samples per 0.1s chunk
-AM Demodulator (numpy)
-    │  envelope detection: sqrt(I² + Q²)
-    │  decimate 100:1 → 24 kHz audio
+    ▼ 480K IQ samples per chunk
+ChannelDemod (channelized AM demodulator)
+    │  freq shift to channel baseband (e.g. 118.6 MHz ANC Tower)
+    │  LPF 12.5 kHz channel isolation (6th-order Butterworth)
+    │  decimate 2.4M → 48k (50:1)
+    │  AM envelope detection: sqrt(I² + Q²)
+    │  audio BPF 300-3400 Hz (4th-order Butterworth)
+    │  decimate 48k → 16k (3:1) — native Whisper rate
     ▼
-Voice Activity Detector (energy VAD)
-    │  threshold: 0.005 RMS
-    │  hold: 1.5s after last voice
-    │  max segment: 30s
+SegmentManager (adaptive squelch)
+    │  calibrate noise floor from first 2s (median RMS)
+    │  adaptive threshold: max(0.02, noise_floor × 10^(8dB/20))
+    │  noise floor tracks via EMA (alpha=0.01) when gate closed
+    │  hold: 1.0s after last voice
+    │  max segment: 30s, min segment: 0.5s
     │
-    ├──→ [voice detected] → SegmentManager buffer
+    ├──→ [squelch opens] → buffer audio chunks
     │                            │
     │                     [gate closes]
     │                            │
     │                            ▼
-    │                     Archive (sox → FLAC)
-    │                     → /mnt/nvme/skybridge/vhf-audio/
+    │                     Speech Quality Gate
+    │                       peak/mean ratio ≥ 3.0?
+    │                       energy CoV > 0.3?
+    │                            │
+    │                     ├── [noise] → discard
+    │                     │
+    │                     ▼ [speech]
+    │                     Normalize audio [-1, 1]
+    │                            │
+    │                     ┌──────┴──────┐
+    │                     ▼             ▼
+    │              Archive (sox)   STT Worker Thread
+    │              → FLAC to NVMe       │
+    │                                   ▼
+    │                          Whisper base.en (faster-whisper, CPU int8)
+    │                          initial_prompt = PANC vocabulary
+    │                          beam_size=5, VAD filter on
+    │                                   │
+    │                                   ▼
+    │                          aviation_lexicon.py post_process()
+    │                            suppress repetitions
+    │                            fix phonetic alphabet
+    │                            correct ATC commands
+    │                            normalize numbers (11 types)
+    │                            score aviation relevance
+    │                                   │
+    │                            ├── [relevance < 0.05] → discard
     │                            │
     │                            ▼
-    │                     STT Worker Thread
-    │                       │
-    │                       ▼
-    │                  Resample 24k→16k (ffmpeg)
-    │                       │
-    │                       ▼
-    │                  Whisper tiny.en (faster-whisper, CPU int8)
-    │                       │
-    │                       ▼
-    │                  Transcript text
-    │                    /         \
-    │                   ▼           ▼
-    │            Meshtastic TX    Log to NVMe
-    │            (ch 0, 200 char) transcripts/YYYY-MM-DD.txt
+    │                     ADS-B Correlation
+    │                       extract callsigns from text
+    │                       match against /run/readsb/aircraft.json
+    │                       annotate transcript with position/alt/squawk
+    │                                   │
+    │                            ┌──────┴──────┐
+    │                            ▼             ▼
+    │                     Meshtastic TX   Log to NVMe
+    │                     (ch 0, 200 char) transcripts/YYYY-MM-DD.txt
     │
-    └──→ [silence] → discard, continue listening
+    └──→ [below threshold] → update noise floor, continue listening
 ```
 
 ## Data Flow: ADS-B Tracking
@@ -123,14 +163,29 @@ readsb                      dump978-fa
     ├→ SBS (:30003)              │
     ├→ Beast (:30005)            ▼
     │                       skyaware978
-    ▼                            │
-tar1090                          ▼
+    │                            │
+    │                            ▼
     │                       /run/dump978/aircraft.json
-    ▼
-Web map (:8504)  ←── merges 1090 + 978
     │
-    ▼
-NVMe globe-history (/mnt/nvme/skybridge/adsb/)
+    ├──────────────────────────────────────────────┐
+    │                                              │
+    ▼                                              ▼
+tar1090 (local only)                        adsb-combine.py
+    │                                    ┌─────────┴──────────┐
+    ▼                                    │                    │
+Web map (:8504)                   /run/readsb/         ADSB.fi API
+    │                             (local, wins)     (2x 250nm circles)
+    ▼                                    │                    │
+NVMe globe-history                       └─────┬─────────────┘
+(/mnt/nvme/skybridge/adsb/)                     │ merge (every 8s)
+                                                ▼
+                                     /run/combine1090/aircraft.json
+                                                │
+                                     ┌──────────┴──────────┐
+                                     ▼                     ▼
+                              tar1090-combo          kneeboard.py
+                              :8505 (HTTP)           /api/traffic
+                              :8506 (HTTPS+GPS)      :8083/:8443
 ```
 
 ## Data Flow: Monitoring & Backup
@@ -169,10 +224,16 @@ network.target
     ├→ openwebrx.service
     │       │
     │       └→ vhf-pipeline.service (after 5s delay)
+    │               │
+    │               └→ kneeboard.service (After=vhf-pipeline)
     │
     ├→ readsb.service
     │       │
-    │       ├→ tar1090.service
+    │       ├→ tar1090.service (local, :8504)
+    │       │
+    │       ├→ adsb-combine.service (After=readsb, Wants=network-online)
+    │       │       │
+    │       │       └→ tar1090-combo.service (Requires=adsb-combine)
     │       │
     │       └→ status-dashboard.service
     │
@@ -181,6 +242,8 @@ network.target
     │       └→ skyaware978.service
     │
     ├→ lighttpd.service
+    │       serves: dashboard (:8080), tar1090 (:8504),
+    │       tar1090-combo (:8505/:8506), kneeboard HTTPS (:8443)
     │
     └→ nvme-backup.timer
 ```
@@ -217,6 +280,59 @@ network.target
 
 ---
 
+## Data Flow: Kneeboard
+
+```
+                        ┌─────────────────────────────────────┐
+                        │        kneeboard.py (Flask)          │
+                        │          port 8083                   │
+                        │                                     │
+  /api/traffic ─────────┤  Local readsb + ADSB.fi merge       │
+                        │  (8s cache, two 250nm circles)      │
+                        │                                     │
+  /api/radio ───────────┤  VHF transcripts from NVMe          │
+                        │  (last 30, newest first)            │
+                        │                                     │
+  /api/weather ─────────┤  aviationweather.gov METAR/TAF      │
+  /api/metarmap         │  (30 Alaska stations, 5min cache)   │
+  /api/sigmets          │                                     │
+  /api/pireps           │  Weather polygons + PIREPs          │
+  /api/gairmet          │  (5min cache each)                  │
+  /api/volash           │                                     │
+  /api/nwsalerts        │  NWS alerts for Alaska              │
+                        │                                     │
+  /api/mwos ────────────┤  Montis Corp MWOS API               │
+                        │  (7 stations, obs + cameras)        │
+                        │                                     │
+  /api/station ─────────┤  systemctl service health check     │
+                        └──────────────┬──────────────────────┘
+                                       │
+                               lighttpd HTTPS proxy
+                               :8443 (self-signed cert)
+                                       │
+                                       ▼
+                               Pilot tablet browser
+                               (Leaflet map, 12 layers)
+                               GPS position tracking
+```
+
+## HTTPS Layer
+
+Browser GPS geolocation requires a secure context (HTTPS). Two services need GPS:
+
+```
+                   ┌──────────────────────────────┐
+                   │  /etc/lighttpd/certs/         │
+                   │  server.pem (self-signed)     │
+                   └──────────┬───────────────────┘
+                              │
+               ┌──────────────┴──────────────┐
+               ▼                             ▼
+    98-kneeboard-ssl.conf         97-tar1090-combo-ssl.conf
+    :8443 → proxy :8083           :8506 → static files
+    (Flask reverse proxy)         (tar1090 html-combo/)
+```
+
 ## Security Model
 
 | Layer | Implementation |
@@ -226,4 +342,5 @@ network.target
 | SSH Hardening | MaxAuthTries 3, LoginGraceTime 30s, no X11/agent forwarding |
 | Network | Private LAN only (192.168.1.0/24) |
 | Services | All run as unprivileged users (blastly, readsb, tar1090) |
+| HTTPS | Self-signed certs for GPS-enabled endpoints (8443, 8506) |
 | Logs | Rotated weekly, 12 weeks retention, compressed |

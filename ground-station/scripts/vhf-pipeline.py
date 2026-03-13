@@ -55,12 +55,15 @@ ARCHIVE_DIR = "/mnt/nvme/skybridge/vhf-audio"
 TRANSCRIPT_DIR = "/mnt/nvme/skybridge/transcripts"
 LOG_DIR = "/mnt/nvme/skybridge/logs"
 
-# VAD: energy threshold (RMS of normalised 0-1 audio)
-VAD_THRESHOLD = 0.02          # raised from 0.005 to reject noise
-VAD_HOLD_S = 1.5              # seconds to keep gate open after last voice
+# VAD / Squelch
+VAD_THRESHOLD = 0.02          # absolute minimum RMS floor (safety net)
+VAD_HOLD_S = 1.0              # seconds to keep gate open after last voice
 SEGMENT_MAX_S = 30            # max segment length before forced Whisper run
 SEGMENT_MIN_S = 0.5           # minimum segment length to bother transcribing
 NO_SPEECH_THRESH = 0.6        # drop Whisper segments above this no_speech_probability
+SQUELCH_SNR_DB = 8            # signal must be this many dB above noise floor
+NOISE_ALPHA = 0.01            # noise floor EMA smoothing factor (slow adaptation)
+PEAK_RATIO_MIN = 3.0          # segment peak/mean ratio for speech-likeness check
 
 # Meshtastic
 MESH_HOST = os.environ.get("MESH_HOST", "")      # set to node IP, or leave blank for serial
@@ -186,11 +189,8 @@ class ChannelDemod:
         # Decimate stage 2: 48k → 16k
         audio = audio[::self.decim2]
 
-        # Normalise
-        peak = np.max(np.abs(audio))
-        if peak > 0:
-            audio /= peak
-
+        # Do NOT normalise here — preserve amplitude for squelch/VAD.
+        # Normalisation happens on completed segments before archive/transcribe.
         return audio.astype(np.float32)
 
 
@@ -436,8 +436,42 @@ def annotate_transcript(text, adsb_matches):
 # VAD + SEGMENT MANAGER
 # ──────────────────────────────────────────────────────────────────────────────
 
+def segment_is_speech(audio_f32):
+    """Quick check: does this segment look like speech (vs pure noise)?
+    Speech has high peak-to-mean ratio and varying energy.
+    Returns True if segment is likely speech.
+    """
+    if len(audio_f32) < int(AUDIO_RATE * SEGMENT_MIN_S):
+        return False
+    abs_audio = np.abs(audio_f32)
+    mean_amp = float(np.mean(abs_audio))
+    if mean_amp < 1e-6:
+        return False
+    peak_amp = float(np.max(abs_audio))
+    peak_ratio = peak_amp / mean_amp
+
+    # Speech has bursts (high peak/mean); flat noise is ~1.5-2.5
+    if peak_ratio < PEAK_RATIO_MIN:
+        return False
+
+    # Check energy variance — split into 100ms frames, measure variance
+    frame_len = int(AUDIO_RATE * 0.1)
+    n_frames = len(audio_f32) // frame_len
+    if n_frames < 3:
+        return True
+    frame_energies = [float(np.mean(audio_f32[i*frame_len:(i+1)*frame_len]**2))
+                      for i in range(n_frames)]
+    energy_std = float(np.std(frame_energies))
+    energy_mean = float(np.mean(frame_energies))
+    if energy_mean < 1e-8:
+        return False
+    # Speech has varying energy across frames (CoV > 0.3)
+    cov = energy_std / energy_mean
+    return cov > 0.3
+
+
 class SegmentManager:
-    """Accumulates audio, detects voice via energy VAD, emits segments."""
+    """Accumulates audio with adaptive squelch and speech quality gating."""
 
     def __init__(self, on_segment, freq_hz):
         self.on_segment = on_segment
@@ -446,16 +480,49 @@ class SegmentManager:
         self.voice_active = False
         self.last_voice_time = 0
         self.segment_start = None
+        # Adaptive noise floor (RMS)
+        self.noise_floor = None  # None = calibrating
+        self._calibration_samples = []
+        self._calibration_chunks = 20  # 2 seconds at 10 chunks/sec
+        self._squelch_linear = 10 ** (SQUELCH_SNR_DB / 20)  # dB → linear multiplier
+        self._chunk_count = 0
+        log.info("Squelch: %d dB above noise floor (linear x%.1f), calibrating %d chunks...",
+                 SQUELCH_SNR_DB, self._squelch_linear, self._calibration_chunks)
 
     def feed(self, chunk_f32):
         rms = float(np.sqrt(np.mean(chunk_f32**2)))
         now = time.monotonic()
-        is_voice = rms > VAD_THRESHOLD
+        self._chunk_count += 1
+
+        # Calibration phase — measure noise floor from first N chunks
+        if self.noise_floor is None:
+            self._calibration_samples.append(rms)
+            if len(self._calibration_samples) >= self._calibration_chunks:
+                # Use median to reject any speech that happened during cal
+                self.noise_floor = float(np.median(self._calibration_samples))
+                adaptive_thresh = max(VAD_THRESHOLD, self.noise_floor * self._squelch_linear)
+                log.info("Noise floor calibrated: %.6f | Squelch threshold: %.6f on %.3f MHz",
+                         self.noise_floor, adaptive_thresh, self.freq_hz / 1e6)
+                self._calibration_samples = []
+            return  # skip processing during calibration
+
+        # Adaptive threshold = noise_floor * squelch_multiplier, but never below absolute minimum
+        adaptive_thresh = max(VAD_THRESHOLD, self.noise_floor * self._squelch_linear)
+        is_voice = rms > adaptive_thresh
+
+        if not is_voice and not self.voice_active:
+            # Update noise floor estimate (only when gate is closed)
+            self.noise_floor = (1 - NOISE_ALPHA) * self.noise_floor + NOISE_ALPHA * rms
+            # Log noise floor periodically (every ~30s at 10 chunks/sec)
+            if self._chunk_count % 300 == 0:
+                log.info("Noise floor: %.6f | Squelch threshold: %.6f | Current RMS: %.6f",
+                         self.noise_floor, adaptive_thresh, rms)
 
         if is_voice:
             self.last_voice_time = now
             if not self.voice_active:
-                log.debug("VAD open (rms=%.4f)", rms)
+                log.info("SQUELCH OPEN (rms=%.4f, thresh=%.4f, noise=%.5f) on %.3f MHz",
+                         rms, adaptive_thresh, self.noise_floor, self.freq_hz / 1e6)
                 self.voice_active = True
                 self.segment_start = datetime.datetime.now(datetime.timezone.utc)
 
@@ -466,12 +533,18 @@ class SegmentManager:
             too_long = duration >= SEGMENT_MAX_S
 
             if gate_closed or too_long:
-                log.debug("VAD close (%.1f s, gate=%s, long=%s)",
-                          duration, gate_closed, too_long)
-                self.voice_active = False
                 segment = np.concatenate(self.buffer)
                 self.buffer = []
-                self.on_segment(segment, self.segment_start, self.freq_hz)
+                self.voice_active = False
+                seg_dur = len(segment) / AUDIO_RATE
+                # Pre-transcription quality gate
+                if segment_is_speech(segment):
+                    log.info("SQUELCH CLOSE — speech segment %.1fs on %.3f MHz",
+                             seg_dur, self.freq_hz / 1e6)
+                    self.on_segment(segment, self.segment_start, self.freq_hz)
+                else:
+                    log.info("SQUELCH CLOSE — rejected noise segment %.1fs on %.3f MHz",
+                             seg_dur, self.freq_hz / 1e6)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -504,8 +577,17 @@ def stt_worker():
             stt_queue.task_done()
 
 
+def normalize_audio(audio_f32):
+    """Normalise audio to [-1, 1] for archiving and transcription."""
+    peak = np.max(np.abs(audio_f32))
+    if peak > 1e-6:
+        return audio_f32 / peak
+    return audio_f32
+
+
 def on_segment(audio, timestamp, freq_hz):
     """Called from main thread when VAD emits a voice segment."""
+    audio = normalize_audio(audio)
     archive_segment(audio, timestamp, freq_hz)
     try:
         stt_queue.put_nowait((audio, timestamp, freq_hz))
