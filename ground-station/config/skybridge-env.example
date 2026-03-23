@@ -1,0 +1,6 @@
+# Copy to /home/blastly/.env.skybridge and fill in real values
+# Source with: source /home/blastly/.env.skybridge
+
+DISCORD_TOKEN="your-discord-bot-token-here"
+CHANNEL_ID="1485484585142980748"
+PI_HOST="blastly@192.168.1.81"
