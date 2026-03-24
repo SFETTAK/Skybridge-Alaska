@@ -34,7 +34,7 @@ vhf:
   frequency: "118.600 MHz"
 
 status:
-  interval: 900
+  interval: 43200  # twice daily (12 hours)
   services:
     - openwebrx
     - readsb
