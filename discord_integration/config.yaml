@@ -1,0 +1,66 @@
+# Skybridge Alaska — Discord Integration Config
+# Location: /home/blastly/Skybridge-Alaska/discord_integration/config.yaml
+#
+# How to get webhook URLs:
+#   Discord Server Settings → Integrations → Webhooks → New Webhook → Copy URL
+#
+# Recommended channel structure:
+#   #skybridge-adsb      — filtered ADS-B traffic alerts
+#   #skybridge-vhf       — Whisper VHF transcripts
+#   #skybridge-status    — 15-min station heartbeat
+#   #skybridge-mesh      — Meshtastic node updates
+#   #skybridge-emergency — 7700/7600/7500 squawk alerts (high-priority)
+
+webhooks:
+  adsb:      "https://discord.com/api/webhooks/PLACEHOLDER/PLACEHOLDER_adsb"
+  emergency: "https://discord.com/api/webhooks/PLACEHOLDER/PLACEHOLDER_emergency"
+  vhf:       "https://discord.com/api/webhooks/PLACEHOLDER/PLACEHOLDER_vhf"
+  status:    "https://discord.com/api/webhooks/PLACEHOLDER/PLACEHOLDER_status"
+  mesh:      "https://discord.com/api/webhooks/PLACEHOLDER/PLACEHOLDER_mesh"
+
+adsb:
+  json_path: "/run/readsb/aircraft.json"
+  poll_interval: 10
+  emergency_squawks: ["7700", "7600", "7500"]
+  low_alt_threshold: 3000
+  min_messages: 5
+  alert_cooldown: 300
+
+vhf:
+  transcript_dir: "/mnt/nvme/skybridge/transcripts"
+  poll_interval: 15
+  batch_window: 30
+  max_lines_per_post: 8
+  frequency: "118.600 MHz"
+
+status:
+  interval: 900
+  services:
+    - openwebrx
+    - readsb
+    - tar1090
+    - vhf-pipeline
+    - adsb-combine
+    - status-dashboard
+  state_file: "/tmp/skybridge_discord_status_state.json"
+  alert_on_change: true
+
+mesh:
+  status_json: "/tmp/skybridge_mesh_status.json"
+  poll_interval: 60
+  alert_threshold: 1800
+  state_file: "/tmp/skybridge_discord_mesh_state.json"
+
+logging:
+  level: INFO
+  file: "/home/blastly/logs/skybridge-discord.log"
+  max_bytes: 5242880
+  backup_count: 3
+
+station:
+  name: "DOT-VHF"
+  location: "Anchorage, AK"
+  lat: 61.22
+  lon: -149.90
+  freq: "118.600 MHz"
+  color: 0x00B0F4
