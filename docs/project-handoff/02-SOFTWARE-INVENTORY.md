@@ -129,13 +129,13 @@ av                16.1.0
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| OpenWebRX | http://192.168.1.81:8073 | SDR spectrum viewer and VHF tuning |
-| Status Dashboard | http://192.168.1.81:8080 | Station health and metrics |
-| VHF Review | http://192.168.1.81:8082 | Audio/transcript browser |
-| Kneeboard | https://192.168.1.81:8443 | Pilot kneeboard (12-layer map, GPS) |
-| tar1090 (local) | http://192.168.1.81:8504 | ADS-B map (local receiver only) |
-| tar1090-combo | http://192.168.1.81:8505 | ADS-B map (local + ADSB.fi statewide) |
-| tar1090-combo (HTTPS) | https://192.168.1.81:8506 | ADS-B map combined (GPS-enabled) |
+| OpenWebRX | http://<station-host>:8073 | SDR spectrum viewer and VHF tuning |
+| Status Dashboard | http://<station-host>:8080 | Station health and metrics |
+| VHF Review | http://<station-host>:8082 | Audio/transcript browser |
+| Kneeboard | https://<station-host>:8443 | Pilot kneeboard (12-layer map, GPS) |
+| tar1090 (local) | http://<station-host>:8504 | ADS-B map (local receiver only) |
+| tar1090-combo | http://<station-host>:8505 | ADS-B map (local + ADSB.fi statewide) |
+| tar1090-combo (HTTPS) | https://<station-host>:8506 | ADS-B map combined (GPS-enabled) |
 
 ## 12. Network Ports
 

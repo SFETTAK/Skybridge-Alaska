@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  release:
+    types: [created]
+
+jobs:
+  syntax-check:
+    name: Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check Python syntax
+        run: |
+          find . -name "*.py" -not -path "./.git/*" | xargs python3 -m py_compile
+          echo "Python syntax OK"
+
+      - name: Check shell scripts
+        run: |
+          find . -name "*.sh" -not -path "./.git/*" | xargs -r bash -n
+          echo "Shell syntax OK"
+
+  smoke-test:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev dependencies
+        run: |
+          if [ -f dev/setup.sh ]; then
+            echo "dev/setup.sh found"
+          fi
+          pip install --quiet flask requests 2>/dev/null || true
+
+      - name: Run smoke tests
+        run: |
+          echo "Smoke test: checking required files exist"
+          test -f README.md && echo "README.md OK"
+          test -f CONTRIBUTING.md && echo "CONTRIBUTING.md OK"
+          test -f LICENSE.md && echo "LICENSE.md OK"
+          echo "All smoke tests passed"
+
+  release-notes:
+    name: Generate Release Notes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        run: |
+          TAG="${{ github.ref_name }}"
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "# Release ${TAG}" > /tmp/release-notes.md
+          echo "" >> /tmp/release-notes.md
+          echo "**Released:** $(date -u +%Y-%m-%dT%H:%MZ)" >> /tmp/release-notes.md
+          echo "" >> /tmp/release-notes.md
+          if [ -n "$PREV_TAG" ]; then
+            echo "## Changes since ${PREV_TAG}" >> /tmp/release-notes.md
+            git log --oneline "${PREV_TAG}..HEAD" >> /tmp/release-notes.md
+          else
+            echo "## All commits" >> /tmp/release-notes.md
+            git log --oneline >> /tmp/release-notes.md
+          fi
+          cat /tmp/release-notes.md
+
+      - name: Upload release notes
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: /tmp/release-notes.md

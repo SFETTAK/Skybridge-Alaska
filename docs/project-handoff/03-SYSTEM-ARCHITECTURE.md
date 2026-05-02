@@ -340,7 +340,7 @@ Browser GPS geolocation requires a secure context (HTTPS). Two services need GPS
 | SSH Access | Ed25519 key-only, no password, no root login |
 | Brute Force | fail2ban: 5 attempts/10min → 1h ban |
 | SSH Hardening | MaxAuthTries 3, LoginGraceTime 30s, no X11/agent forwarding |
-| Network | Private LAN only (192.168.1.0/24) |
+| Network | Private LAN only (<station-LAN>) |
 | Services | All run as unprivileged users (blastly, readsb, tar1090) |
 | HTTPS | Self-signed certs for GPS-enabled endpoints (8443, 8506) |
 | Logs | Rotated weekly, 12 weeks retention, compressed |

@@ -1,0 +1,572 @@
+openapi: 3.1.0
+info:
+  title: Skybridge Alaska API
+  version: 1.0.0
+  description: >
+    Auto-generated OpenAPI 3.1 reference for Skybridge Alaska ground-station kneeboard
+    (kneeboard.py) and admin/blaze-claw (admin_server.py) Flask endpoints.
+    Render with Redoc. Publish to GitHub Pages.
+  contact:
+    email: steven.fett@alaska.gov
+servers:
+  - url: http://localhost:5000
+    description: Kneeboard (local)
+  - url: http://localhost:5050
+    description: Admin / blaze-claw (local)
+
+tags:
+  - name: kneeboard
+    description: Kneeboard aviation data endpoints
+  - name: admin
+    description: Admin / fleet management endpoints
+
+paths:
+  # ── Kneeboard endpoints ──────────────────────────────────────────────────
+
+  /api/traffic:
+    get:
+      tags: [kneeboard]
+      summary: ADS-B traffic targets
+      description: Returns current ADS-B traffic targets visible to the ground station.
+      responses:
+        "200":
+          description: Traffic object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  targets:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TrafficTarget"
+                  ts:
+                    type: number
+                    description: Unix timestamp of last refresh
+
+  /api/radio:
+    get:
+      tags: [kneeboard]
+      summary: Recent VHF radio log entries
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+          description: Maximum number of entries to return
+      responses:
+        "200":
+          description: Array of radio log entries (newest first)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RadioEntry"
+
+  /api/weather:
+    get:
+      tags: [kneeboard]
+      summary: METAR weather data
+      description: Returns cached METAR observations for configured stations.
+      responses:
+        "200":
+          description: METAR data object or array
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MetarData"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/MetarData"
+
+  /api/station:
+    get:
+      tags: [kneeboard]
+      summary: Ground station status
+      description: Returns ground station health and configuration info.
+      responses:
+        "200":
+          description: Station status object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StationStatus"
+
+  /api/sigmets:
+    get:
+      tags: [kneeboard]
+      summary: Active SIGMETs
+      description: Returns GeoJSON features for active SIGMETs over Alaska.
+      responses:
+        "200":
+          description: GeoJSON feature collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeoJsonFeatureCollection"
+
+  /api/pireps:
+    get:
+      tags: [kneeboard]
+      summary: PIREPs
+      description: Returns recent pilot reports (PIREPs).
+      responses:
+        "200":
+          description: Array of PIREP objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pirep"
+
+  /api/mwos:
+    get:
+      tags: [kneeboard]
+      summary: MWOS observations
+      description: Returns Mountain Weather Observation Station data.
+      responses:
+        "200":
+          description: MWOS result object
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /api/mwos/catalog:
+    get:
+      tags: [kneeboard]
+      summary: MWOS station catalog
+      description: Returns full list of MWOS stations (Montis + extras).
+      responses:
+        "200":
+          description: Array of station descriptors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MwosStation"
+
+  /api/metarmap:
+    get:
+      tags: [kneeboard]
+      summary: METAR map data
+      description: Returns METAR data formatted for map overlay rendering.
+      responses:
+        "200":
+          description: METAR map result
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /api/gairmet:
+    get:
+      tags: [kneeboard]
+      summary: G-AIRMET advisories
+      description: Returns GeoJSON features for active G-AIRMETs over Alaska.
+      responses:
+        "200":
+          description: GeoJSON feature collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeoJsonFeatureCollection"
+
+  /api/volash:
+    get:
+      tags: [kneeboard]
+      summary: Volcanic ash advisories
+      description: Returns GeoJSON features for active volcanic ash advisories.
+      responses:
+        "200":
+          description: GeoJSON feature collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeoJsonFeatureCollection"
+
+  /api/nwsalerts:
+    get:
+      tags: [kneeboard]
+      summary: NWS weather alerts
+      description: Returns active National Weather Service alerts for Alaska.
+      responses:
+        "200":
+          description: NWS alerts (cached or live)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NwsAlert"
+
+  /api/briefing/latest:
+    get:
+      tags: [kneeboard]
+      summary: Latest weather briefing
+      description: Returns the most recent generated weather briefing.
+      responses:
+        "200":
+          description: Briefing object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Briefing"
+
+  # ── Admin / blaze-claw endpoints ─────────────────────────────────────────
+
+  /admin/api/fleet:
+    get:
+      tags: [admin]
+      summary: Fleet node list
+      description: Returns all registered mesh nodes in the fleet.
+      responses:
+        "200":
+          description: Array of fleet nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FleetNode"
+
+  /admin/api/node/{node_id}:
+    get:
+      tags: [admin]
+      summary: Single node detail
+      parameters:
+        - name: node_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Node detail object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FleetNode"
+        "404":
+          description: Node not found
+
+  /admin/api/recent-messages:
+    get:
+      tags: [admin]
+      summary: Recent mesh messages
+      description: Returns the most recent messages exchanged over the mesh.
+      responses:
+        "200":
+          description: Array of message objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MeshMessage"
+
+  /admin/api/topology:
+    get:
+      tags: [admin]
+      summary: Network topology graph
+      description: Returns node/edge graph for the current mesh topology.
+      responses:
+        "200":
+          description: Topology graph
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TopologyGraph"
+
+  /admin/api/traceroute:
+    post:
+      tags: [admin]
+      summary: Initiate traceroute
+      description: Triggers a mesh traceroute to the specified destination node.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [destination]
+              properties:
+                destination:
+                  type: integer
+                  description: Destination node ID
+      responses:
+        "200":
+          description: Traceroute result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hops:
+                    type: array
+                    items:
+                      type: integer
+                  latency_ms:
+                    type: number
+
+  /admin/api/traffic:
+    get:
+      tags: [admin]
+      summary: Admin ADS-B traffic view
+      description: Returns ADS-B traffic targets as seen from the admin interface.
+      responses:
+        "200":
+          description: Traffic object
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+# ── Component schemas ────────────────────────────────────────────────────────
+
+components:
+  schemas:
+
+    TrafficTarget:
+      type: object
+      properties:
+        hex:
+          type: string
+          description: ICAO hex code
+        flight:
+          type: string
+        lat:
+          type: number
+        lon:
+          type: number
+        alt_baro:
+          type: integer
+        gs:
+          type: number
+          description: Ground speed (knots)
+        track:
+          type: number
+        seen:
+          type: number
+
+    RadioEntry:
+      type: object
+      properties:
+        ts:
+          type: number
+          description: Unix timestamp
+        freq:
+          type: string
+        text:
+          type: string
+        source:
+          type: string
+
+    MetarData:
+      type: object
+      properties:
+        station_id:
+          type: string
+        raw_text:
+          type: string
+        temp_c:
+          type: number
+        dewpoint_c:
+          type: number
+        wind_dir_degrees:
+          type: integer
+        wind_speed_kt:
+          type: integer
+        visibility_statute_mi:
+          type: number
+        sky_condition:
+          type: array
+          items:
+            type: object
+        flight_category:
+          type: string
+          enum: [VFR, MVFR, IFR, LIFR]
+        observation_time:
+          type: string
+          format: date-time
+
+    StationStatus:
+      type: object
+      properties:
+        name:
+          type: string
+        lat:
+          type: number
+        lon:
+          type: number
+        uptime_s:
+          type: integer
+        sdr_ok:
+          type: boolean
+        mesh_ok:
+          type: boolean
+        version:
+          type: string
+
+    GeoJsonFeatureCollection:
+      type: object
+      required: [type, features]
+      properties:
+        type:
+          type: string
+          enum: [FeatureCollection]
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [Feature]
+              geometry:
+                type: object
+              properties:
+                type: object
+
+    Pirep:
+      type: object
+      properties:
+        aircraft_ref:
+          type: string
+        location:
+          type: string
+        time_utc:
+          type: string
+        altitude:
+          type: string
+        sky_condition:
+          type: string
+        turbulence:
+          type: string
+        icing:
+          type: string
+        raw_text:
+          type: string
+
+    MwosStation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lat:
+          type: number
+        lon:
+          type: number
+        elevation_ft:
+          type: integer
+        source:
+          type: string
+
+    NwsAlert:
+      type: object
+      properties:
+        id:
+          type: string
+        event:
+          type: string
+        headline:
+          type: string
+        severity:
+          type: string
+        urgency:
+          type: string
+        onset:
+          type: string
+          format: date-time
+        expires:
+          type: string
+          format: date-time
+        description:
+          type: string
+
+    Briefing:
+      type: object
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        text:
+          type: string
+        stations:
+          type: array
+          items:
+            type: string
+        flight_category_summary:
+          type: object
+
+    FleetNode:
+      type: object
+      properties:
+        id:
+          type: integer
+        long_name:
+          type: string
+        short_name:
+          type: string
+        hw_model:
+          type: string
+        role:
+          type: string
+        last_heard:
+          type: number
+        snr:
+          type: number
+        lat:
+          type: number
+        lon:
+          type: number
+
+    MeshMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        from_id:
+          type: integer
+        to_id:
+          type: integer
+        text:
+          type: string
+        ts:
+          type: number
+        portnum:
+          type: string
+
+    TopologyGraph:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              label:
+                type: string
+        edges:
+          type: array
+          items:
+            type: object
+            properties:
+              from:
+                type: integer
+              to:
+                type: integer
+              snr:
+                type: number

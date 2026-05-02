@@ -10,8 +10,8 @@
 
 ### SSH
 ```bash
-ssh blastly@192.168.1.81        # Ethernet
-ssh blastly@192.168.1.80        # WiFi (backup)
+ssh <operator>@<station-host>        # Ethernet
+ssh blastly@<station-host-alt>        # WiFi (backup)
 ```
 - Key-only auth (Ed25519). No password login.
 - If locked out by fail2ban, wait 1 hour or access via physical console.
@@ -19,9 +19,9 @@ ssh blastly@192.168.1.80        # WiFi (backup)
 ### Web Interfaces
 | URL | Service |
 |-----|---------|
-| http://192.168.1.81:8073 | OpenWebRX (SDR spectrum viewer) |
-| http://192.168.1.81:8504 | tar1090 (ADS-B aircraft map) |
-| http://192.168.1.81:8080 | Status Dashboard |
+| http://<station-host>:8073 | OpenWebRX (SDR spectrum viewer) |
+| http://<station-host>:8504 | tar1090 (ADS-B aircraft map) |
+| http://<station-host>:8080 | Status Dashboard |
 
 ---
 
@@ -53,8 +53,8 @@ rtl_test -d 2 -t                       # Test ADSB1090
 
 ### Network
 ```bash
-ip addr show eth0                      # Should be 192.168.1.81
-ip addr show wlan0                     # Should be 192.168.1.80
+ip addr show eth0                      # Should be <station-host>
+ip addr show wlan0                     # Should be <station-host-alt>
 ping -c 3 8.8.8.8                      # Internet connectivity
 ```
 
@@ -150,7 +150,7 @@ sudo readsb-set-location 61.2181 -149.9003
 ```
 
 ### View ADS-B Data Feed
-- Web map: http://192.168.1.81:8504
+- Web map: http://<station-host>:8504
 - SBS output: `nc 127.0.0.1 30003` (BaseStation format)
 - Beast output: `nc 127.0.0.1 30005` (binary)
 
@@ -159,7 +159,7 @@ sudo readsb-set-location 61.2181 -149.9003
 ## 6. OpenWebRX Administration
 
 ### Access Admin Panel
-Navigate to http://192.168.1.81:8073 → Settings (login required)
+Navigate to http://<station-host>:8073 → Settings (login required)
 
 ### Create/Reset Admin User
 ```bash

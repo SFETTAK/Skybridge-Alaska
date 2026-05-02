@@ -31,10 +31,10 @@ The station captures VHF pilot communications, transcribes them using AI (OpenAI
 
 | What | Where |
 |------|-------|
-| SSH | `ssh blastly@192.168.1.81` (key-only) |
-| SDR Spectrum | http://192.168.1.81:8073 |
-| Aircraft Map | http://192.168.1.81:8504 |
-| Status Dashboard | http://192.168.1.81:8080 |
+| SSH | `ssh <operator>@<station-host>` (key-only) |
+| SDR Spectrum | http://<station-host>:8073 |
+| Aircraft Map | http://<station-host>:8504 |
+| Status Dashboard | http://<station-host>:8080 |
 | VHF Audio Archive | /mnt/nvme/skybridge/vhf-audio/ |
 | Transcripts | /mnt/nvme/skybridge/transcripts/ |
 | ADS-B History | /mnt/nvme/skybridge/adsb/ |

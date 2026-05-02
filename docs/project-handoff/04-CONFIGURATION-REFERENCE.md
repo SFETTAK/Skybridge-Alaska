@@ -11,8 +11,8 @@
 | Parameter | Value |
 |-----------|-------|
 | Hostname | DOT-VHF |
-| Ethernet (eth0) | 192.168.1.81/24 (DHCP) |
-| WiFi (wlan0) | 192.168.1.80/24 (DHCP) |
+| Ethernet (eth0) | <station-host>/24 (LAN) (DHCP) |
+| WiFi (wlan0) | <station-host-alt>/24 (LAN) (DHCP) |
 | DNS | Via DHCP / NetworkManager |
 
 ## 2. OpenWebRX

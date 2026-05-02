@@ -10,8 +10,8 @@ Designed for one-handed operation in the cockpit. Runs as a Flask web app on the
 
 | Endpoint | URL | Notes |
 |----------|-----|-------|
-| HTTP (no GPS) | `http://192.168.1.81:8083` | Works but no GPS tracking |
-| HTTPS (GPS-enabled) | `https://192.168.1.81:8443` | Accept cert warning once, then GPS works |
+| HTTP (no GPS) | `http://<station-host>:8083` | Works but no GPS tracking |
+| HTTPS (GPS-enabled) | `https://<station-host>:8443` | Accept cert warning once, then GPS works |
 
 GPS tracking requires HTTPS because browsers restrict the Geolocation API to secure contexts. The HTTPS endpoint uses a lighttpd reverse proxy with a self-signed certificate.
 
@@ -154,7 +154,7 @@ The browser Geolocation API requires a secure context. Without HTTPS, the map wo
 1. Self-signed certificate at `/etc/lighttpd/certs/server.pem`
 2. lighttpd config at `/etc/lighttpd/conf-enabled/98-kneeboard-ssl.conf`
 3. Reverse proxies Flask :8083 through HTTPS :8443
-4. Pilot opens `https://192.168.1.81:8443` and accepts the certificate warning once
+4. Pilot opens `https://<station-host>:8443` and accepts the certificate warning once
 5. Map centers on pilot GPS position and updates continuously
 
 The tar1090-combo map has the same setup on port 8506.

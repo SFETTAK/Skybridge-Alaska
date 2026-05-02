@@ -10,17 +10,25 @@ import datetime
 import json
 import os
 import re
+import subprocess
+import uuid
 import urllib.request
 import urllib.error
 
 from flask import Flask, jsonify, request
+from flask_sock import Sock
 
 app = Flask(__name__)
+sock = Sock(app)
 
 TRANSCRIPT_DIR = "/mnt/nvme/skybridge/transcripts"
 ADSB_JSON = "/run/readsb/aircraft.json"
 METAR_CACHE = {"data": None, "ts": 0}
 METAR_TTL = 300  # 5 min cache
+
+
+def _freshness(max_age_s):
+    return {"as_of": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"), "max_age_s": max_age_s}
 
 # ADS-B: ADSB.fi statewide feed — two overlapping 250nm circles cover ~500nm
 _ADSB_FI_CACHE = {"data": [], "ts": 0}
@@ -125,17 +133,22 @@ def api_traffic():
         "total": len(aircraft),
         "local": local_ct,
         "adsbfi": len(aircraft) - local_ct,
+        **_freshness(30),
     })
 
 
 @app.route("/api/radio")
 def api_radio():
-    """Recent VHF transcripts — last N entries."""
-    limit = int(request.args.get("limit", 20))
-    today = datetime.date.today().isoformat()
-    tfile = os.path.join(TRANSCRIPT_DIR, f"{today}.txt")
+    """Recent VHF transcripts — last N entries, falling back across recent days."""
+    limit = int(request.args.get("limit", 30))
     entries = []
-    if os.path.exists(tfile):
+    # Walk back up to 7 days so the panel is never empty on quiet mornings
+    for delta in range(7):
+        day = (datetime.date.today() - datetime.timedelta(days=delta)).isoformat()
+        tfile = os.path.join(TRANSCRIPT_DIR, f"{day}.txt")
+        if not os.path.exists(tfile):
+            continue
+        day_entries = []
         with open(tfile) as f:
             for line in f:
                 line = line.strip()
@@ -144,11 +157,14 @@ def api_radio():
                 m = re.match(r"(\S+)\s+(?:\[([^\]]+)\]\s+)?(.*)", line)
                 if m:
                     ts_str, freq, text = m.groups()
-                    entries.append({
+                    day_entries.append({
                         "ts": ts_str,
                         "freq": freq or "",
                         "text": text,
                     })
+        entries = day_entries + entries
+        if len(entries) >= limit:
+            break
     # Return newest first, limited
     return jsonify(entries[-limit:][::-1])
 
@@ -188,6 +204,7 @@ def api_weather():
         except Exception:
             pass
 
+    result.update(_freshness(300))
     METAR_CACHE["data"] = result
     METAR_CACHE["ts"] = now
     return jsonify(result)
@@ -209,6 +226,7 @@ def api_station():
         "hostname": "DOT-VHF",
         "services": services,
         "location": {"lat": 61.1744, "lon": -149.9964, "name": "PANC"},
+        **_freshness(60),
     })
 
 
@@ -374,6 +392,60 @@ def api_mwos():
         except Exception as e:
             print(f"MWOS {stn['name']} error: {e}")
     return jsonify(result)
+
+
+@app.route("/api/mwos/catalog")
+def api_mwos_catalog():
+    """All known MWOS stations: Montis catalog + supplemental Alaska sites."""
+    MONTIS_KEY = "VESTUG2IIGDKKCDJFDQC6ZZAODETADWB"
+    FALLBACK = [
+        {"id": 133, "siteName": "Lake Hood MWOS", "icaoId": "PALH", "latitude": 61.1776, "longitude": -149.9615, "state": "AK", "source": "montis"},
+        {"id": 1,   "siteName": "Merrill Field MWOS", "icaoId": "PAMR", "latitude": 61.2167, "longitude": -149.8337, "state": "AK", "source": "montis"},
+        {"id": 265, "siteName": "Merrill Field MWOS 2", "icaoId": "PAMR", "latitude": 61.2148, "longitude": -149.8396, "state": "AK", "source": "montis"},
+        {"id": 529, "siteName": "Nuiqsut MWOS", "icaoId": "PAQT", "latitude": 70.2129, "longitude": -150.9998, "state": "AK", "source": "montis"},
+        {"id": 430, "siteName": "Kaktovik MWOS", "icaoId": "", "latitude": 70.1101, "longitude": -143.635, "state": "AK", "source": "montis"},
+        {"id": 694, "siteName": "Port Graham MWOS", "icaoId": "", "latitude": 59.3508, "longitude": -151.8277, "state": "AK", "source": "montis"},
+        {"id": 232, "siteName": "Port Townsend MWOS", "icaoId": "", "latitude": 48.1069, "longitude": -122.7778, "state": "WA", "source": "montis"},
+    ]
+    SUPPLEMENTAL = [
+        {"id": None, "siteName": "Anchorage Intl (PANC)", "icaoId": "PANC", "latitude": 61.1743, "longitude": -149.9960, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Elmendorf AFB (PAED)", "icaoId": "PAED", "latitude": 61.2506, "longitude": -149.8064, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Juneau Intl (PAJN)", "icaoId": "PAJN", "latitude": 58.3550, "longitude": -134.5762, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Kodiak (PADQ)", "icaoId": "PADQ", "latitude": 57.7500, "longitude": -152.4939, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Kenai Municipal (PAEN)", "icaoId": "PAEN", "latitude": 60.5731, "longitude": -151.2431, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Bethel (PABT)", "icaoId": "PABT", "latitude": 60.7797, "longitude": -161.8379, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Yakutat (PAYA)", "icaoId": "PAYA", "latitude": 59.5033, "longitude": -139.6603, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Nome (PAOM)", "icaoId": "PAOM", "latitude": 64.5122, "longitude": -165.4453, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Utqiagvik/Barrow (PABR)", "icaoId": "PABR", "latitude": 71.2856, "longitude": -156.7664, "state": "AK", "source": "faa"},
+        {"id": None, "siteName": "Talkeetna (PATK)", "icaoId": "PATK", "latitude": 62.3200, "longitude": -150.0942, "state": "AK", "source": "faa"},
+    ]
+    try:
+        import ssl
+        ctx = ssl.create_default_context()
+        req = urllib.request.Request(
+            "https://api.montiscorp.com/mwos",
+            headers={"authorization": MONTIS_KEY}
+        )
+        with urllib.request.urlopen(req, timeout=8, context=ctx) as resp:
+            raw = json.loads(resp.read())
+        montis_stations = [
+            {
+                "id": s.get("id"),
+                "siteName": s.get("siteName", ""),
+                "icaoId": s.get("icaoId", ""),
+                "latitude": s.get("latitude", 0),
+                "longitude": s.get("longitude", 0),
+                "state": s.get("state", ""),
+                "source": "montis",
+            }
+            for s in raw if isinstance(s, dict)
+        ]
+    except Exception:
+        montis_stations = FALLBACK
+
+    existing_icao = {s["icaoId"] for s in montis_stations if s["icaoId"]}
+    extras = [s for s in SUPPLEMENTAL if s["icaoId"] not in existing_icao]
+    return jsonify(montis_stations + extras)
 
 
 @app.route("/api/metarmap")
@@ -561,6 +633,17 @@ def api_nwsalerts():
         return jsonify(_WX_CACHE.get(cache_key, {}).get("data", []))
 
 
+@app.route("/api/briefing/latest")
+def api_briefing_latest():
+    import pathlib
+    briefing_path = pathlib.Path("/mnt/nvme/skybridge/briefings/latest.md")
+    try:
+        markdown = briefing_path.read_text()
+        return jsonify({"markdown": markdown})
+    except FileNotFoundError:
+        return jsonify({"markdown": ""}), 404
+
+
 # ── HTML ─────────────────────────────────────────────────────────────────────
 
 @app.route("/")
@@ -579,6 +662,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
 <title>SkyBridge Kneeboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
 <style>
   :root {
     --bg: #0a0e14; --surface: rgba(11,15,21,0.92); --surface2: #1a2230;
@@ -596,6 +681,59 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
   /* ── LAYOUT ── */
   #map { position:absolute; top:0; left:0; right:0; bottom:0; z-index:1; }
+
+  /* ── CHAT SIDEBAR ── */
+  #chat-sidebar {
+    position:absolute; top:44px; right:0; bottom:0; width:320px; z-index:900;
+    background:var(--surface); border-left:1px solid var(--border);
+    display:flex; flex-direction:column;
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    transform:translateX(0); transition:transform .25s ease;
+  }
+  #chat-sidebar.collapsed { transform:translateX(316px); }
+  #chat-sidebar-toggle {
+    position:absolute; top:50%; left:-28px; transform:translateY(-50%);
+    width:28px; height:48px; background:var(--surface);
+    border:1px solid var(--border); border-right:none;
+    border-radius:6px 0 0 6px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--green); font-size:14px; z-index:901;
+  }
+  #chat-history {
+    flex:1; overflow-y:auto; padding:10px 10px 6px;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  #chat-history::-webkit-scrollbar { width:4px; }
+  #chat-history::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .chat-msg { max-width:85%; padding:7px 10px; border-radius:10px; font-size:12px; line-height:1.5; word-break:break-word; }
+  .chat-msg.pilot { align-self:flex-end; background:var(--green); color:#000; border-radius:10px 10px 2px 10px; }
+  .chat-msg.blaze { align-self:flex-start; background:var(--surface2); color:var(--white); border-radius:10px 10px 10px 2px; border:1px solid var(--border); }
+  .chat-msg.sys { align-self:center; color:var(--text2); font-size:10px; background:transparent; }
+  #chat-input-row {
+    display:flex; gap:6px; padding:8px 10px;
+    border-top:1px solid var(--border);
+  }
+  #chat-input {
+    flex:1; background:var(--surface2); border:1px solid var(--border);
+    border-radius:6px; padding:7px 10px; color:var(--text); font-size:12px;
+    resize:none; outline:none; font-family:inherit;
+  }
+  #chat-input:focus { border-color:var(--green); }
+  #chat-send {
+    background:var(--green); color:#000; border:none; border-radius:6px;
+    padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  #chat-mic {
+    background:var(--surface2); color:var(--text); border:1px solid var(--border);
+    border-radius:6px; padding:7px 10px; font-size:14px; cursor:pointer;
+    flex-shrink:0;
+  }
+  #chat-mic.listening { background:var(--red,#e74c3c); color:#fff; border-color:var(--red,#e74c3c); }
+  #chat-header {
+    padding:8px 10px; font-size:11px; font-weight:700; color:var(--green);
+    letter-spacing:1px; border-bottom:1px solid var(--border);
+    text-transform:uppercase;
+  }
 
   .top-bar {
     position:absolute; top:0; left:0; right:0; z-index:1000; height:44px;
@@ -742,11 +880,48 @@ HTML_PAGE = r"""<!DOCTYPE html>
   .mwos-pop .mcams .cdir { font-size:8px; color:var(--text2); text-align:center;
     text-transform:uppercase; letter-spacing:1px; }
 
+  /* MWOS persistent camera panel */
+  #mwos-panel {
+    position:absolute; bottom:12px; right:12px; z-index:1000;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:8px; width:256px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    display:none;
+  }
+  #mwos-panel.visible { display:block; }
+  #mwos-panel .mp-hdr { font-size:10px; font-weight:700; color:#ff6600;
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;
+    display:flex; align-items:center; justify-content:space-between; }
+  .mwos-camera-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+  .mwos-camera-grid .mc-item { position:relative; }
+  .mwos-camera-grid .mc-item img { width:100%; border-radius:4px; cursor:pointer;
+    border:2px solid transparent; }
+  .mwos-camera-grid .mc-dir { font-size:8px; color:var(--text2); text-align:center;
+    text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .mc-fresh { position:absolute; top:3px; right:3px; width:8px; height:8px;
+    border-radius:50%; border:1px solid rgba(0,0,0,0.4); }
+  .mc-fresh.fresh-green { background:var(--green); }
+  .mc-fresh.fresh-yellow { background:var(--amber); }
+  .mc-fresh.fresh-red { background:var(--red); }
+
   /* Map: no filter on satellite tiles */
   .leaflet-control-zoom a { background:var(--surface)!important; color:var(--text)!important;
     border-color:var(--border)!important; width:36px!important; height:36px!important;
     line-height:36px!important; font-size:16px!important; }
   .leaflet-control-attribution { display:none!important; }
+
+  /* Responsive: tablet portrait — map top 60%, widgets stack below */
+  @media (max-width: 1024px) {
+    #map { height:60vh!important; }
+    .sidebar { width:100%!important; height:auto!important; position:relative!important; }
+    .top-bar { font-size:13px; }
+    .leaflet-control-zoom a { width:44px!important; height:44px!important; line-height:44px!important; }
+  }
+  @media (orientation: portrait) {
+    #map { height:55vh!important; }
+    .sidebar { width:100%!important; height:auto!important; position:relative!important; flex-direction:row!important; flex-wrap:wrap!important; }
+    .widget { min-height:44px; }
+    button, .btn, input[type=button], .leaflet-control-zoom a { min-height:44px!important; min-width:44px!important; }
+  }
 </style>
 </head>
 <body>
@@ -761,6 +936,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <span>ALT: <span class="v" id="gsAlt">----</span>ft</span>
     <span>TFC: <span class="v" id="tfcCt">0</span></span>
   </div>
+  <button onclick="resetLayout()" style="margin-left:8px;padding:2px 8px;font-size:10px;cursor:pointer;">Reset Layout</button>
 </div>
 
 <div class="fab-col">
@@ -871,6 +1047,14 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
 <div id="map"></div>
 
+<div id="mwos-panel">
+  <div class="mp-hdr">
+    <span id="mwosPanelName">MWOS Cameras</span>
+    <span id="mwosPanelTime" style="color:var(--text2);font-weight:400"></span>
+  </div>
+  <div class="mwos-camera-grid" id="mwosPanelGrid"></div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════════════
 // STATE
@@ -886,6 +1070,7 @@ let layers = {
 };
 let layerGroups = {};
 let trafficMarkers = {};
+let pilotContext = {aircraft:[], metar:{}, transcripts:[]};
 
 const AIRPORTS = {
   'PANC':[61.1744,-149.9964],'PAFA':[64.8151,-147.8564],'PAJN':[58.3547,-134.5762],
@@ -1111,6 +1296,7 @@ async function loadPireps(){
 // ═══════════════════════════════════════════════════════════════════
 function updateTraffic(data){
   const aircraft=data.aircraft||[];
+  pilotContext.aircraft=aircraft.slice(0,10).map(ac=>({id:ac.flight||ac.reg||ac.hex,alt:ac.alt,gs:ac.gs}));
   const seen=new Set();
   document.getElementById('tfcCt').textContent=aircraft.length;
   aircraft.forEach(ac=>{
@@ -1147,6 +1333,7 @@ function updateTraffic(data){
 async function loadRadio(){
   try{
     const r=await fetch('/api/radio?limit=30'); const data=await r.json();
+    pilotContext.transcripts=data.slice(0,5).map(e=>e.text);
     document.getElementById('rBadge').textContent=data.length;
     const log=document.getElementById('radioLog');
     log.innerHTML=data.map(e=>{
@@ -1164,8 +1351,22 @@ async function loadRadio(){
 // ═══════════════════════════════════════════════════════════════════
 function toggleWx(){document.getElementById('wxPanel').classList.toggle('open');
   if(document.getElementById('wxPanel').classList.contains('open'))loadWxText();}
+function contextInjection(msg) {
+  try {
+    const center = map ? map.getCenter() : null;
+    const parts = ['[PILOT CONTEXT]'];
+    if (center) parts.push('Map center: ' + center.lat.toFixed(4) + ', ' + center.lng.toFixed(4));
+    if (pilotContext.aircraft.length) parts.push('Visible aircraft (' + pilotContext.aircraft.length + '): ' + pilotContext.aircraft.map(a=>a.id+(a.alt?'@'+a.alt+'ft':'')).join(', '));
+    const metarEntries = Object.entries(pilotContext.metar);
+    if (metarEntries.length) parts.push('METAR: ' + metarEntries.slice(0,2).map(([k,v])=>k+': '+v).join(' | '));
+    if (pilotContext.transcripts.length) parts.push('Recent VHF:\n' + pilotContext.transcripts.map(t=>'  '+t).join('\n'));
+    parts.push('[/PILOT CONTEXT]');
+    return parts.join('\n') + '\n\n' + msg;
+  } catch(e) { return msg; }
+}
 async function loadWxText(){
   try{const r=await fetch('/api/weather');const d=await r.json();
+    pilotContext.metar=d.metars||{};
     let h='';
     for(const[stn,raw] of Object.entries(d.metars)){
       const taf=d.tafs[stn]||'';
@@ -1201,6 +1402,7 @@ async function loadMWOS(){
         });
         camHtml+='</div>';
       }
+      const flightvisUrl=`https://flightvis.montiscorp.com/map?lat=${s.lat}&lon=${s.lon}&m=12638`;
       const pop=`<div class="mwos-pop">
         <div class="mh">${s.name}</div>
         <div style="font-size:10px;color:var(--text2)">MWOS Live &mdash; ${o.time?new Date(o.time).toLocaleTimeString():'no data'}</div>
@@ -1214,11 +1416,44 @@ async function loadMWOS(){
         </div>
         <div style="font-family:monospace;font-size:9px;color:var(--text2);margin:4px 0">${esc(o.raw)}</div>
         ${camHtml}
+        <div style="margin-top:6px"><a href="${flightvisUrl}" target="_blank" style="color:#ff6600;font-size:10px;text-decoration:none">&#9654; Open in FlightVis</a></div>
       </div>`;
       const m=L.marker([s.lat,s.lon],{icon,zIndexOffset:500}).bindPopup(pop,{maxWidth:340,minWidth:280});
       layerGroups.mwos.addLayer(m);
     });
+    updateMwosPanel(data);
   }catch(e){console.error('MWOS error:',e);}
+}
+
+function updateMwosPanel(stations){
+  const panel=document.getElementById('mwos-panel');
+  const grid=document.getElementById('mwosPanelGrid');
+  const nameEl=document.getElementById('mwosPanelName');
+  const timeEl=document.getElementById('mwosPanelTime');
+  if(!stations||!stations.length){panel.classList.remove('visible');return;}
+  let best=null;
+  if(pilotPos){
+    let minD=Infinity;
+    stations.forEach(s=>{
+      if(!s.cameras||!s.cameras.length)return;
+      const d=(s.lat-pilotPos.lat)**2+(s.lon-pilotPos.lng)**2;
+      if(d<minD){minD=d;best=s;}
+    });
+  }
+  if(!best)best=stations.find(s=>s.cameras&&s.cameras.length)||stations[0];
+  if(!best||!best.cameras||!best.cameras.length){panel.classList.remove('visible');return;}
+  const cams=best.cameras.slice(0,4);
+  const now=Date.now();
+  grid.innerHTML=cams.map(c=>{
+    const ts=c.ts?new Date(c.ts).getTime():0;
+    const age=ts?now-ts:Infinity;
+    const fc=age<300000?'fresh-green':age<1800000?'fresh-yellow':'fresh-red';
+    return`<div class="mc-item"><img src="${c.url}" alt="${c.dir}" onclick="window.open('${c.url}','_blank')"/><div class="mc-fresh ${fc}"></div><div class="mc-dir">${c.dir}</div></div>`;
+  }).join('');
+  nameEl.textContent=best.name;
+  const t=best.obs&&best.obs.time?new Date(best.obs.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+  timeEl.textContent=t;
+  panel.classList.add('visible');
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1304,6 +1539,155 @@ async function pollSlow(){
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// LAYOUT PERSISTENCE — skybridge-layout-v1
+// ═══════════════════════════════════════════════════════════════════
+const LAYOUT_KEY = 'skybridge-layout-v1';
+function saveLayout(serializedItems) {
+  localStorage.setItem(LAYOUT_KEY, JSON.stringify(serializedItems));
+}
+function loadLayout() {
+  try { return JSON.parse(localStorage.getItem(LAYOUT_KEY)); } catch(e) { return null; }
+}
+function resetLayout() {
+  localStorage.removeItem(LAYOUT_KEY);
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CHAT SIDEBAR
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  const CHAT_KEY = 'skybridge-chat-v1';
+  const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+  let chatWs = null;
+  let chatCollapsed = false;
+
+  function loadChatHistory() {
+    try {
+      const raw = localStorage.getItem(CHAT_KEY);
+      if (!raw) return [];
+      const msgs = JSON.parse(raw);
+      const cutoff = Date.now() - MAX_AGE_MS;
+      return msgs.filter(m => m.ts > cutoff);
+    } catch(e) { return []; }
+  }
+
+  function saveChatHistory(msgs) {
+    const cutoff = Date.now() - MAX_AGE_MS;
+    const pruned = msgs.filter(m => m.ts > cutoff).slice(-200);
+    try { localStorage.setItem(CHAT_KEY, JSON.stringify(pruned)); } catch(e) {}
+  }
+
+  function appendChatMsg(role, text, ts) {
+    const hist = document.getElementById('chat-history');
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + role;
+    div.textContent = text;
+    hist.appendChild(div);
+    hist.scrollTop = hist.scrollHeight;
+    const msgs = loadChatHistory();
+    msgs.push({role, text, ts: ts || Date.now()});
+    saveChatHistory(msgs);
+  }
+
+  function restoreChatHistory() {
+    const hist = document.getElementById('chat-history');
+    hist.innerHTML = '';
+    const msgs = loadChatHistory();
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + m.role;
+      div.textContent = m.text;
+      hist.appendChild(div);
+    });
+    hist.scrollTop = hist.scrollHeight;
+  }
+
+  function connectChatWs() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    chatWs = new WebSocket(proto + '://' + location.host + '/ws/chat');
+    chatWs.onmessage = e => {
+      appendChatMsg('blaze', e.data);
+    };
+    chatWs.onclose = () => {
+      chatWs = null;
+      setTimeout(connectChatWs, 3000);
+    };
+    chatWs.onerror = () => chatWs.close();
+  }
+
+  window.sendChat = function() {
+    const inp = document.getElementById('chat-input');
+    const text = inp.value.trim();
+    if (!text) return;
+    inp.value = '';
+    appendChatMsg('pilot', text);
+    if (!chatWs || chatWs.readyState !== WebSocket.OPEN) {
+      appendChatMsg('sys', '[reconnecting…]');
+      connectChatWs();
+      setTimeout(() => {
+        if (chatWs && chatWs.readyState === WebSocket.OPEN) chatWs.send(contextInjection(text));
+      }, 1500);
+    } else {
+      chatWs.send(contextInjection(text));
+    }
+  };
+
+  window.toggleChatSidebar = function() {
+    const sb = document.getElementById('chat-sidebar');
+    const btn = document.getElementById('chat-sidebar-toggle');
+    chatCollapsed = !chatCollapsed;
+    sb.classList.toggle('collapsed', chatCollapsed);
+    btn.innerHTML = chatCollapsed ? '&#x276F;' : '&#x276E;';
+  };
+
+  // Voice input via Web Speech API (webkit prefix for Safari)
+  var _voiceRecognition = null;
+  window.toggleVoiceInput = function() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var micBtn = document.getElementById('chat-mic');
+    if (!SR) {
+      appendChatMsg('sys', '[Voice input not supported in this browser]');
+      return;
+    }
+    if (_voiceRecognition) {
+      _voiceRecognition.stop();
+      _voiceRecognition = null;
+      if (micBtn) micBtn.classList.remove('listening');
+      return;
+    }
+    var r = new SR();
+    r.lang = 'en-US';
+    r.interimResults = false;
+    r.maxAlternatives = 1;
+    _voiceRecognition = r;
+    if (micBtn) micBtn.classList.add('listening');
+    r.onresult = function(e) {
+      var transcript = e.results[0][0].transcript;
+      var inp = document.getElementById('chat-input');
+      if (inp) inp.value = (inp.value ? inp.value + ' ' : '') + transcript;
+    };
+    r.onend = function() {
+      _voiceRecognition = null;
+      if (micBtn) micBtn.classList.remove('listening');
+    };
+    r.onerror = function() {
+      _voiceRecognition = null;
+      if (micBtn) micBtn.classList.remove('listening');
+    };
+    r.start();
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    restoreChatHistory();
+    connectChatWs();
+    document.getElementById('chat-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+    });
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 initMap();
@@ -1312,8 +1696,65 @@ pollFast(); pollSlow(); loadWxText();
 setInterval(pollFast, 5000);      // traffic + radio: 5s
 setInterval(pollSlow, 300000);    // wx overlays: 5min
 </script>
+<div class="grid-stack" id="dashboard-grid" style="display:none"></div>
+
+<div id="chat-sidebar">
+  <button id="chat-sidebar-toggle" onclick="toggleChatSidebar()" title="Toggle chat">&#x276E;</button>
+  <div id="chat-header">&#x1F9E0; Blaze</div>
+  <div id="chat-history"></div>
+  <div id="chat-input-row">
+    <textarea id="chat-input" rows="2" placeholder="Ask Blaze..."></textarea>
+    <button id="chat-mic" onclick="toggleVoiceInput()" title="Push to talk">&#x1F3A4;</button>
+    <button id="chat-send" onclick="sendChat()">Send</button>
+  </div>
+</div>
 </body>
 </html>"""
+
+
+@sock.route("/ws/chat")
+def ws_chat(ws):
+    """WebSocket chat — proxies pilot messages to OpenClaw Blaze agent."""
+    # Derive session_id from cookie or generate a new one
+    environ = ws.environ
+    cookie_header = environ.get("HTTP_COOKIE", "")
+    session_id = None
+    for part in cookie_header.split(";"):
+        part = part.strip()
+        if part.startswith("skybridge_session="):
+            session_id = part[len("skybridge_session="):].strip()
+            break
+    if not session_id:
+        session_id = str(uuid.uuid4())
+
+    while True:
+        try:
+            msg = ws.receive(timeout=120)
+        except Exception:
+            break
+        if msg is None:
+            break
+        try:
+            result = subprocess.run(
+                ["openclaw", "agent", "--agent", "main",
+                 "--session-id", session_id,
+                 "--json", "--timeout", "30",
+                 "-m", msg],
+                capture_output=True, text=True, timeout=35
+            )
+            if result.returncode == 0:
+                try:
+                    data = json.loads(result.stdout)
+                    reply = data.get("text") or data.get("content") or result.stdout.strip()
+                except Exception:
+                    reply = result.stdout.strip()
+            else:
+                reply = f"[error] {result.stderr.strip() or 'agent returned non-zero exit'}"
+        except subprocess.TimeoutExpired:
+            reply = "[error] agent timed out (30s)"
+        except Exception as e:
+            reply = f"[error] {e}"
+        ws.send(reply)
 
 
 if __name__ == "__main__":

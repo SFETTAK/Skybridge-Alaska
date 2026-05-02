@@ -106,3 +106,11 @@ logs/
 *.pkg
 *.deb
 *.rpm
+
+# Internal-only project journal (not for public push)
+JOURNAL.md
+
+# Operational scripts with hardcoded internal hostnames — kept on Pi, not pushed
+ground-station/scripts/sync_to_dothq.sh
+ground-station/scripts/status-dashboard.py
+discord_integration/discord_webhooks.py

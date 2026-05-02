@@ -10,18 +10,8 @@ Complete documentation for the DOT-VHF ground station:
 - [04 - Configuration Reference](project-handoff/04-CONFIGURATION-REFERENCE.md)
 - [05 - Operational Runbook](project-handoff/05-OPERATIONAL-RUNBOOK.md)
 
-## NASAO 2025 Presentation Materials
-Research and pitch documents prepared for the 2025 National Association of State Aviation Officials conference:
-
-- [Elevator Pitch](nasao-2025/elevator_pitch.md)
-- [Pilot Benefits](nasao-2025/pilot_benefits.md)
-- [Technical Whitepaper](nasao-2025/complete_technical_whitepaper.md)
-- [Alaska Aviation Gap Analysis](nasao-2025/gap_analysis_official.md)
-- [Existing Solutions Analysis](nasao-2025/existing_solutions_analysis.md)
-- [Industry Partnerships](nasao-2025/industry_partnerships.md)
-- [Intellectual Property Overview](nasao-2025/intellectual_property_overview.md)
-- [IoT Sensor Integration](nasao-2025/iot_sensor_integration.md)
-- [Media Coverage](nasao-2025/media_coverage.md)
+## Aviation Safety Context
+- [Aviation Safety Context](aviation-safety-context.md) — statistics, citations, and stakeholder talking points
 
 ## Reference
 - [NASA TAIGA ASN.1 Specification](TAIGA_ASN1_Reference.pdf) (PDF)
