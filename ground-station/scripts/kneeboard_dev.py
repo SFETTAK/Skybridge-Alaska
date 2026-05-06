@@ -1423,7 +1423,7 @@ _WX_RETENTION  = 30 * 86400 # 30 days
 # The whole point of the cert dashboard is to expose every node in our
 # observation network — Walter Combs at Montis runs the calibrated MWOS fleet
 # and this page is the public proof that his data agrees with NWS METARs.
-# Default weights for the SkyBridge-Certified weighted-ensemble. Higher =
+# Default weights for the SkyBridge Composite weighted-ensemble. Higher =
 # more trusted in the composite. Hand-tuned starting values; over time the
 # historical-logging table lets us compute optimal weights from observed
 # accuracy vs METAR baseline. These are TUNABLE — adjust as the data
@@ -1665,7 +1665,7 @@ def _wx_db_take_snapshot():
                 if pt is not None:
                     _wx_db_insert(ts_bucket, anchor_id, tag, pt)
                     rows_written += 1
-            # Compute and log the SkyBridge-Certified composite
+            # Compute and log the SkyBridge Composite (weighted-ensemble)
             cert_pt = _compute_certified(by_source)
             if cert_pt:
                 _wx_db_insert(ts_bucket, anchor_id, "certified", cert_pt)
@@ -1931,7 +1931,7 @@ def wx_validate():
         for _om_id, src_tag, label, _note in _OM_MODELS:
             sources.append((label, om_models.get(src_tag), "model"))
 
-        # Compute the SkyBridge-Certified composite — weighted mean across all
+        # Compute the SkyBridge Composite — weighted mean across all
         # sources that reported. Appears as the rightmost column.
         if historical is not None:
             cert_pt = historical.get((anchor_id, "certified"))
@@ -1990,7 +1990,7 @@ def wx_validate():
     src_keys = [("MWOS", "mwos:"), ("NWS Grid", "nws:")]
     for _om_id, src_tag, label, _note in _OM_MODELS:
         src_keys.append((label, "model:" + src_tag))
-    src_keys.append(("SkyBridge Certified", "certified:"))
+    src_keys.append(("SkyBridge Composite", "certified:"))
     summary_rows = ""
     for label, prefix in src_keys:
         ws_mae, ws_n = mae(summary_acc["wind_spd"], prefix)
@@ -2152,7 +2152,7 @@ def wx_validate():
       </span>
     </div>
 
-    <h2>SkyBridge-Certified Weights <small>weighted-mean ensemble — these define our published value · tunable from observed historical agreement</small></h2>
+    <h2>SkyBridge Composite Weights <small>weighted-mean ensemble of authoritative sources · not a published or attested value · tunable from observed historical agreement</small></h2>
     <div class="weights">
       <span class="wlabel">Weights →</span>
       {''.join(f'<span class="weight-pill"><span class="src-name">{_WX_CERT_LABEL.get(tag, tag)}</span><span class="src-w">×{w:.2f}</span></span>' for tag, w in _WX_CERT_WEIGHTS.items())}
@@ -2337,7 +2337,7 @@ const SOURCES = [
   { tag:'om_gem',   label:'GEM (Canada)',    color:'#cc4444', on:false, kind:'grid' },
   { tag:'om_ecmwf', label:'ECMWF (Europe)',  color:'#33cc66', on:false, kind:'grid' },
   { tag:'om_jma',   label:'JMA (Japan)',     color:'#ff66cc', on:false, kind:'grid' },
-  { tag:'certified',label:'★ CERTIFIED',     color:'#cc88ff', on:true,  kind:'grid' },
+  { tag:'certified',label:'★ SkyBridge Composite', color:'#cc88ff', on:false, kind:'grid' },
 ];
 
 // ── Map ─────────────────────────────────────────────────────────────────────
@@ -3374,7 +3374,7 @@ _WX_RETENTION  = 30 * 86400 # 30 days
 # The whole point of the cert dashboard is to expose every node in our
 # observation network — Walter Combs at Montis runs the calibrated MWOS fleet
 # and this page is the public proof that his data agrees with NWS METARs.
-# Default weights for the SkyBridge-Certified weighted-ensemble. Higher =
+# Default weights for the SkyBridge Composite weighted-ensemble. Higher =
 # more trusted in the composite. Hand-tuned starting values; over time the
 # historical-logging table lets us compute optimal weights from observed
 # accuracy vs METAR baseline. These are TUNABLE — adjust as the data
@@ -3616,7 +3616,7 @@ def _wx_db_take_snapshot():
                 if pt is not None:
                     _wx_db_insert(ts_bucket, anchor_id, tag, pt)
                     rows_written += 1
-            # Compute and log the SkyBridge-Certified composite
+            # Compute and log the SkyBridge Composite (weighted-ensemble)
             cert_pt = _compute_certified(by_source)
             if cert_pt:
                 _wx_db_insert(ts_bucket, anchor_id, "certified", cert_pt)
@@ -3858,7 +3858,7 @@ def wx_validate_public():
         for _om_id, src_tag, label, _note in _OM_MODELS:
             sources.append((label, om_models.get(src_tag), "model"))
 
-        # Compute the SkyBridge-Certified composite — weighted mean across all
+        # Compute the SkyBridge Composite — weighted mean across all
         # sources that reported. Appears as the rightmost column.
         if historical is not None:
             cert_pt = historical.get((anchor_id, "certified"))
@@ -3917,7 +3917,7 @@ def wx_validate_public():
     src_keys = [("MWOS", "mwos:"), ("NWS Grid", "nws:")]
     for _om_id, src_tag, label, _note in _OM_MODELS:
         src_keys.append((label, "model:" + src_tag))
-    src_keys.append(("SkyBridge Certified", "certified:"))
+    src_keys.append(("SkyBridge Composite", "certified:"))
     summary_rows = ""
     for label, prefix in src_keys:
         ws_mae, ws_n = mae(summary_acc["wind_spd"], prefix)
@@ -4079,7 +4079,7 @@ def wx_validate_public():
       </span>
     </div>
 
-    <h2>SkyBridge-Certified Weights <small>weighted-mean ensemble — these define our published value · tunable from observed historical agreement</small></h2>
+    <h2>SkyBridge Composite Weights <small>weighted-mean ensemble of authoritative sources · not a published or attested value · tunable from observed historical agreement</small></h2>
     <div class="weights">
       <span class="wlabel">Weights →</span>
       {''.join(f'<span class="weight-pill"><span class="src-name">{_WX_CERT_LABEL.get(tag, tag)}</span><span class="src-w">×{w:.2f}</span></span>' for tag, w in _WX_CERT_WEIGHTS.items())}
@@ -4201,7 +4201,7 @@ const SOURCES = [
   { tag:'om_gem',   label:'GEM (Canada)',    color:'#cc4444', on:false, kind:'grid' },
   { tag:'om_ecmwf', label:'ECMWF (Europe)',  color:'#33cc66', on:false, kind:'grid' },
   { tag:'om_jma',   label:'JMA (Japan)',     color:'#ff66cc', on:false, kind:'grid' },
-  { tag:'certified',label:'★ CERTIFIED',     color:'#cc88ff', on:true,  kind:'grid' },
+  { tag:'certified',label:'★ SkyBridge Composite', color:'#cc88ff', on:false, kind:'grid' },
 ];
 
 // ── Map ─────────────────────────────────────────────────────────────────────
