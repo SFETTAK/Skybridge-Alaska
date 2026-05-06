@@ -163,7 +163,7 @@ def _fetch_adsbfi():
 
 _PUBLIC_NAV_LINKS = [
     ("/public/wx-shootout",      "Weather Shootout"),
-    ("/public/wx-validate",      "Cert Validate"),
+    ("/public/wx-validate",      "Comp Validate"),
     ("/public/wx-icons-preview", "HUD Icons"),
     ("/public/icons-preview",    "ADS-B Icons"),
 ]
@@ -1457,7 +1457,7 @@ def _compute_certified(by_source):
         return None
     out = {
         "source": "certified:skybridge",
-        "label": "SKYBRIDGE CERTIFIED",
+        "label": "SKYBRIDGE COMPOSITE",
         "ts": "",
         "dir_deg": None, "speed_kt": None, "gust_kt": None,
         "temp_c": None, "freezing_level_ft": None,
@@ -2105,11 +2105,11 @@ def wx_validate():
     .note {{ background:#1f2738; padding:14px 18px; border-radius:8px; margin-top:24px; font-size:12px; line-height:1.6; color:#9aa5b8; max-width:1100px; }}
     </style></head><body>
 
-    <h1>Weather Validate <span class="dev">DEV — CERT PATH</span>
+    <h1>Weather Validate <span class="dev">DEV — COMPOSITE</span>
         <a href="/icons-preview">→ icons-preview</a>
         <a href="/wx-icons-preview">→ wx-icons-preview</a></h1>
 
-    <p class="lede">Side-by-side comparison of every weather source feeding the kneeboard. The point: prove SkyBridge agrees with the FAA-authoritative sources where they exist, and show where it adds new value through calibrated MWOS observations and open-data model fill. This is the seed artifact for an eventual FAA accuracy-certification submission.</p>
+    <p class="lede">Side-by-side comparison of every weather source feeding the kneeboard. The point: prove SkyBridge agrees with the FAA-authoritative sources where they exist, and show where it adds new value through calibrated MWOS observations and open-data model fill. This is the seed artifact for a future FAA accuracy-attestation submission.</p>
 
     <h2>Source Provenance <small>which upstreams are authoritative, which are calibrated private, which are open-data</small></h2>
     <div class="provenance">
@@ -2174,7 +2174,7 @@ def wx_validate():
         <th class="src">MWOS <span class="cal">cal</span></th>
         <th class="src">NWS Grid <span class="faa">FAA</span></th>
         {''.join(f'<th class="src">{label} <span class="mdl" title="{note}">model</span></th>' for _om_id, _src_tag, label, note in _OM_MODELS)}
-        <th class="src cert">SkyBridge <span class="cert-tag">CERTIFIED</span></th>
+        <th class="src cert">SkyBridge <span class="cert-tag">COMPOSITE</span></th>
       </tr>
       {rows_html}
     </table>
@@ -2270,7 +2270,7 @@ def wx_shootout():
     own color layer (toggleable) over the same Leaflet base. Watch the
     models disagree spatially — GFS streamlines diverge from ECMWF
     streamlines in the gaps where neither has ground truth, and the
-    SkyBridge CERTIFIED composite splits the difference.
+    SkyBridge Composite splits the difference.
 
     Per-source colors are baked in below — distinct + glanceable. Toggle
     each source on/off; multiple can stack so divergence is visible.
@@ -3408,7 +3408,7 @@ def _compute_certified(by_source):
         return None
     out = {
         "source": "certified:skybridge",
-        "label": "SKYBRIDGE CERTIFIED",
+        "label": "SKYBRIDGE COMPOSITE",
         "ts": "",
         "dir_deg": None, "speed_kt": None, "gust_kt": None,
         "temp_c": None, "freezing_level_ft": None,
@@ -4036,7 +4036,7 @@ def wx_validate_public():
         <a href="/icons-preview">→ icons-preview</a>
         <a href="/wx-icons-preview">→ wx-icons-preview</a></h1>
 
-    <p class="lede">Side-by-side comparison of every weather source feeding the kneeboard. The point: prove SkyBridge agrees with the FAA-authoritative sources where they exist, and show where it adds new value through calibrated MWOS observations and open-data model fill. This is the seed artifact for an eventual FAA accuracy-certification submission.</p>
+    <p class="lede">Side-by-side comparison of every weather source feeding the kneeboard. The point: prove SkyBridge agrees with the FAA-authoritative sources where they exist, and show where it adds new value through calibrated MWOS observations and open-data model fill. This is the seed artifact for a future FAA accuracy-attestation submission.</p>
 
     <h2>Source Provenance <small>which upstreams are authoritative, which are calibrated private, which are open-data</small></h2>
     <div class="provenance">
@@ -4101,7 +4101,7 @@ def wx_validate_public():
         <th class="src">MWOS <span class="cal">cal</span></th>
         <th class="src">NWS Grid <span class="faa">FAA</span></th>
         {''.join(f'<th class="src">{label} <span class="mdl" title="{note}">model</span></th>' for _om_id, _src_tag, label, note in _OM_MODELS)}
-        <th class="src cert">SkyBridge <span class="cert-tag">CERTIFIED</span></th>
+        <th class="src cert">SkyBridge <span class="cert-tag">COMPOSITE</span></th>
       </tr>
       {rows_html}
     </table>
@@ -4134,7 +4134,7 @@ def wx_shootout_public():
     own color layer (toggleable) over the same Leaflet base. Watch the
     models disagree spatially — GFS streamlines diverge from ECMWF
     streamlines in the gaps where neither has ground truth, and the
-    SkyBridge CERTIFIED composite splits the difference.
+    SkyBridge Composite splits the difference.
 
     Per-source colors are baked in below — distinct + glanceable. Toggle
     each source on/off; multiple can stack so divergence is visible.
@@ -6662,7 +6662,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
   <!-- Cross-links to public dashboards. Clean text style matches the top-bar density. -->
   <span class="kb-dash-nav" style="display:inline-flex;gap:6px;margin-left:14px;align-items:center;">
     <a href="/public/wx-shootout"    style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">Wx Shootout</a>
-    <a href="/public/wx-validate"    style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">Cert Validate</a>
+    <a href="/public/wx-validate"    style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">Comp Validate</a>
     <a href="/public/wx-icons-preview" style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">HUD Icons</a>
     <a href="/public/icons-preview"  style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">ADS-B Icons</a>
   </span>
