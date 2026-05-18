@@ -19,7 +19,7 @@ import uuid
 import urllib.request
 import urllib.error
 
-from flask import Flask, jsonify, request, make_response, redirect
+from flask import Flask, jsonify, request, make_response, redirect, send_from_directory
 from flask_sock import Sock
 
 app = Flask(__name__)
@@ -166,6 +166,7 @@ _PUBLIC_NAV_LINKS = [
     ("/public/wx-validate",      "Comp Validate"),
     ("/public/wx-icons-preview", "HUD Icons"),
     ("/public/icons-preview",    "ADS-B Icons"),
+    ("/public/hardware-guide",   "Hardware Guide"),
 ]
 
 def _public_nav_html(active_path):
@@ -319,7 +320,18 @@ _DASHBOARD_GUIDES = {
     '/public/icons-preview':
         "Design preview of aircraft category icons. Silhouettes by category, color by "
         "altitude band, outline by operator class.",
+    '/public/hardware-guide':
+        "Getting-started guide for SkyBridge hardware. Consumer radio picks, feature "
+        "comparison matrix, the eight mesh channels, and how data flows from a ground "
+        "station through the mesh to the kneeboard.",
 }
+
+
+_STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+
+@app.route("/static/<path:fname>")
+def static_file(fname):
+    return send_from_directory(_STATIC_DIR, fname)
 
 
 @app.route("/public", strict_slashes=False)
@@ -2698,6 +2710,8 @@ _PUBLIC_GATED_PATHS = {
     "/public/wx-icons-preview",
     "/public/wx-validate",
     "/public/wx-shootout",
+    "/public/hardware-guide",
+    "/public/mesh-channels",
 }
 
 @app.before_request
@@ -4530,6 +4544,504 @@ setInterval(loadData, 5*60*1000);
 </script>
 <!--SBFOOTER--></body></html>''', "/public/wx-shootout")
 
+
+@app.route("/public/mesh-channels")
+def mesh_channels_legacy():
+    return redirect("/public/hardware-guide", code=302)
+
+
+@app.route("/public/hardware-guide")
+def hardware_guide_public():
+    """Getting-started hardware guide. Flow graphic, consumer radio picks,
+    feature-comparison matrix, eight mesh channels, packet flow, QoS classes,
+    bring-online checklist. Renamed from /public/mesh-channels in v2."""
+
+    CHANNELS = [
+        (0, "SkyBridge-AK",  "PRIMARY",
+         "Discovery, heartbeats, node naming, short text", "both",
+         "Map shows mesh node positions and last-heard times", "P3", "#23d18b"),
+        (1, "WX-OBS", "Weather observations",
+         "METAR, MWOS, SPECI from anchor stations (compressed TAIGA frames)", "inbound to kneeboard",
+         "Renders as live wind barbs / ceiling / visibility on the map and bottom strip", "P2", "#0090ff"),
+        (2, "WX-ALERTS", "Hazards",
+         "SIGMET, AIRMET, CWA, VAA, TFR polygons + activation flags", "inbound to kneeboard",
+         "Painted as colored polygons; flashes the FAA COMMS panel on receipt", "P0", "#ff5040"),
+        (3, "PIREP", "Pilot reports",
+         "UA / UUA pilot weather reports - text + decoded turb/icing/sky cover", "both",
+         "Drops a PIREP pin at the report location with 60-min fade", "P1", "#ffaa00"),
+        (4, "TRAFFIC", "Cooperative ADS-B relay",
+         "Compressed position broadcasts from mesh nodes with ADS-B receivers", "both",
+         "Aircraft icons appear on the map with the standard altitude-band coloring", "P2", "#88ccff"),
+        (5, "TEXT", "Pilot-to-pilot",
+         "Short free-form text messages between pilots and dispatch", "both",
+         "Appears in the kneeboard chat panel; tagged with sender callsign", "P3", "#c8e88c"),
+        (6, "BLAZE", "Operations coordination",
+         "OpenClaw / Blaze ops control: tasking, status, ETA updates", "both",
+         "Routed to the Blaze ops view (not the pilot kneeboard)", "P1", "#ff66cc"),
+        (7, "TEL", "Node telemetry",
+         "Battery, RSSI, uptime, SNR, packet counters per node", "inbound to hub",
+         "Drives the health badges on the project landing page", "P4", "#9aa5b8"),
+    ]
+
+    HARDWARE = [
+        ("Elecrow ThinkNode M3", "#23d18b",
+         "$39.90", "Entry pocket tracker",
+         "LR1110 - nRF52840 - GPS - BLE - IP66 enclosed - magnetic USB charging",
+         "Cheapest way onto the mesh. Credit-card-size, weatherproof, pre-flashed. Pair with your phone over Bluetooth.",
+         "/static/radios/thinknode-m3.jpg", "Elecrow"),
+        ("LilyGO T-Deck", "#ffaa00",
+         "$67.97", "Standalone Blackberry-style handheld",
+         "SX1262 - ESP32-S3 - QWERTY keyboard - 2.8\" touchscreen - trackball",
+         "No phone required - keyboard and screen on the device. Best for pilots who want to type and read PIREPs without pulling out a phone.",
+         "/static/radios/lilygo-tdeck.png", "LilyGO"),
+        ("muzi works H2T", "#cc44ff",
+         "$99.00", "Premium portable, fully assembled",
+         "Heltec T114 inside - GPS - water-resistant case - 2000 mAh LiPo - whip antenna",
+         "Built and tested by muzi works. Includes battery and antenna; powers on out of the box. The 'gift it to a non-technical pilot' option.",
+         "/static/radios/muzi-h2t.jpg", "muzi works"),
+        ("Elecrow ThinkNode M6 Solar", "#88ccff",
+         "$99.00", "Fixed outdoor anchor",
+         "nRF52840 - GPS - IP65 enclosed - integrated solar panel - all-weather power",
+         "Set-and-forget anchor station. Solar-powered, weatherproof. Mount it on a roof or pole and forget about it.",
+         "/static/radios/thinknode-m6.jpg", "Elecrow"),
+    ]
+
+    RADIO_CFG = [
+        ("Region",          "US (902-928 MHz ISM)"),
+        ("Modem preset",    "LongModerate - ~1 kbit/s, ~10 km LOS, 8 channel slots"),
+        ("Frequency slots", "Slot 0...7 (one per channel below) - auto-selected by name hash"),
+        ("Encryption",      "Per-channel PSK. Rotated quarterly; current PSKs distributed with the kit."),
+        ("Hardware",        "Any 915 MHz Meshtastic-compatible device - see Compatible Hardware below"),
+        ("Firmware",        "Stock Meshtastic >= 2.5.x - no SkyBridge fork required"),
+    ]
+
+    FEATURES = [
+        ("Form factor",
+         ("v", "Card - pocket"), ("v", "Handheld"), ("v", "Handheld"), ("v", "Outdoor box"),
+         "-"),
+        ("Pre-flashed Meshtastic",
+         ("y", "Out of box"), ("y", "Out of box"), ("y", "Out of box"), ("y", "Out of box"),
+         "No flashing required by testers."),
+        ("Built-in GPS",
+         ("y", ""), ("n", "Add-on"), ("y", ""), ("y", ""),
+         "Used on TRAFFIC channel for position reports + node-on-map."),
+        ("Display",
+         ("n", ""), ("v", "2.8\" TFT touch *"), ("v", "OLED"), ("v", "OLED"),
+         "Optional - kneeboard is the primary screen."),
+        ("Input method",
+         ("v", "1 button"), ("v", "QWERTY + trackball *"), ("v", "Buttons"), ("v", "Buttons"),
+         "T-Deck enables TEXT/PIREP entry without a phone."),
+        ("Battery included",
+         ("v", "770 mAh"), ("v", "1500 mAh"), ("v", "2000 mAh *"), ("v", "Solar + LiPo"),
+         "All four ship with a battery."),
+        ("Solar charging",
+         ("n", ""), ("n", ""), ("n", ""), ("y", "*"),
+         "M6 -> unattended outdoor anchor stations."),
+        ("Weatherproofing",
+         ("v", "IP66"), ("n", "Indoor"), ("v", "Splash-resistant"), ("v", "IP65 *"),
+         "M6 and M3 survive outdoor mounting; H2T tolerates a wet kneeboard bag."),
+        ("Bluetooth (BLE)",
+         ("y", ""), ("y", ""), ("y", ""), ("y", ""),
+         "Phone-pair link from radio -> phone -> kneeboard."),
+        ("Wi-Fi",
+         ("n", ""), ("y", "*"), ("n", ""), ("n", ""),
+         "T-Deck can act as a Wi-Fi -> MQTT bridge for hub stations."),
+        ("External antenna",
+         ("n", "Internal"), ("n", "Internal"), ("y", "Whip"), ("y", "Whip *"),
+         "External antenna adds range - best for outdoor anchors and pilot bags."),
+        ("Standalone (no phone)",
+         ("n", ""), ("y", "*"), ("n", ""), ("n", ""),
+         "T-Deck is the only one usable in-flight without a paired device."),
+        ("USB-C charging",
+         ("y", "Magnetic *"), ("y", ""), ("y", ""), ("y", ""),
+         "M3 magnetic puck is the nicest UX for cockpit charging."),
+    ]
+
+    PRIORITIES = [
+        ("P0", "Life-safety alerts. SIGMET, VAA, emergency PIREP. Bypass queueing.", "#ff5040"),
+        ("P1", "Time-critical hazards + ops. AIRMET, CWA, Blaze tasking.",            "#ffaa00"),
+        ("P2", "Operational data. Routine weather observations, traffic relay.",      "#0090ff"),
+        ("P3", "Background. Chat, heartbeats, discovery.",                            "#23d18b"),
+        ("P4", "Bulk. Node telemetry, log shipping. Sent during quiet airtime.",     "#9aa5b8"),
+    ]
+
+    chan_rows = "".join(f'''
+        <tr>
+          <td class="slot"><span class="slot-num" style="background:{color}">{slot}</span></td>
+          <td class="cname" style="color:{color}">{name}</td>
+          <td class="crole">{role}</td>
+          <td class="ccarries">{carries}</td>
+          <td class="cdir">{direction}</td>
+          <td class="ckb">{kb_use}</td>
+          <td class="cpri"><span class="pri-pill pri-{pri.lower()}">{pri}</span></td>
+        </tr>'''
+        for slot, name, role, carries, direction, kb_use, pri, color in CHANNELS)
+
+    cfg_rows = "".join(
+        f'<tr><td class="ckey">{k}</td><td class="cval">{v}</td></tr>' for k, v in RADIO_CFG
+    )
+
+    def _render_card(name, accent, price, tagline, specs, note, photo, credit):
+        return f'''
+        <div class="hwcard" style="border-top:3px solid {accent}">
+          <div class="hwphoto"><img src="{photo}" alt="{name}" loading="lazy"/></div>
+          <div class="hwname" style="color:{accent}">{name}</div>
+          <div class="hwtag">{tagline}</div>
+          <div class="hwprice" style="color:{accent}">{price}</div>
+          <div class="hwspec">{specs}</div>
+          <div class="hwnote">{note}</div>
+          <div class="hwcredit">photo: {credit}</div>
+        </div>'''
+
+    hw_cards = "".join(_render_card(*row) for row in HARDWARE)
+
+    def _cell(c):
+        kind, val = c
+        star = " <span class='lead'>*</span>" if "*" in val else ""
+        clean = val.replace("*", "").strip()
+        if kind == "y":
+            mark = "<span class='yes'>+</span>"
+            txt = f" {clean}" if clean else ""
+            return f"<td class='c-y'>{mark}{txt}{star}</td>"
+        if kind == "n":
+            mark = "<span class='no'>-</span>"
+            txt = f" <span class='dim'>{clean}</span>" if clean else ""
+            return f"<td class='c-n'>{mark}{txt}</td>"
+        return f"<td class='c-v'>{clean}{star}</td>"
+
+    feat_rows = ""
+    for row in FEATURES:
+        feature, m3, td, h2t, m6, sb = row
+        feat_rows += (
+            f"<tr><th class='fname'>{feature}</th>"
+            f"{_cell(m3)}{_cell(td)}{_cell(h2t)}{_cell(m6)}"
+            f"<td class='sb'>{sb}</td></tr>"
+        )
+
+    pri_rows = "".join(
+        f'<div class="prirow"><span class="pri-pill pri-{tag.lower()}">{tag}</span>'
+        f'<span class="pri-desc">{desc}</span></div>'
+        for tag, desc, _c in PRIORITIES
+    )
+
+    flow_svg = '''<svg viewBox="0 0 920 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(70, 110)">
+        <line x1="0" y1="-15" x2="0" y2="70" stroke="#9aa5b8" stroke-width="2"/>
+        <line x1="-12" y1="-10" x2="12" y2="-10" stroke="#9aa5b8" stroke-width="2"/>
+        <circle cx="0" cy="-20" r="4" fill="#23d18b">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="-22" y="68" width="44" height="22" rx="2" fill="#141a26" stroke="#23d18b" stroke-width="1.5"/>
+        <text x="0" y="82" fill="#23d18b" font-size="8" text-anchor="middle" font-family="monospace" font-weight="700">MWOS</text>
+        <line x1="-35" y1="90" x2="35" y2="90" stroke="#445" stroke-width="1"/>
+        <line x1="-30" y1="93" x2="-25" y2="97" stroke="#445" stroke-width="0.8"/>
+        <line x1="-15" y1="93" x2="-10" y2="97" stroke="#445" stroke-width="0.8"/>
+        <line x1="0" y1="93"  x2="5" y2="97"   stroke="#445" stroke-width="0.8"/>
+        <line x1="15" y1="93" x2="20" y2="97"  stroke="#445" stroke-width="0.8"/>
+        <text x="0" y="115" fill="#d8e1ec" font-size="11" text-anchor="middle" font-weight="700">Ground station</text>
+        <text x="0" y="128" fill="#566" font-size="9" text-anchor="middle" font-family="monospace">MWOS - METAR - ASOS</text>
+      </g>
+      <g transform="translate(135, 90)" fill="none" stroke="#23d18b">
+        <path d="M 0 30 Q 18 0 0 -30" stroke-width="2" opacity="0.9">
+          <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 0 45 Q 28 0 0 -45" stroke-width="1.5" opacity="0.6">
+          <animate attributeName="opacity" values="0.2;0.6;0.2" dur="1.8s" begin="0.3s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 0 60 Q 38 0 0 -60" stroke-width="1" opacity="0.4">
+          <animate attributeName="opacity" values="0.1;0.4;0.1" dur="1.8s" begin="0.6s" repeatCount="indefinite"/>
+        </path>
+        <text x="50" y="-30" fill="#23d18b" font-size="10" font-family="monospace" font-weight="700">LoRa 915 MHz</text>
+      </g>
+      <g transform="translate(310, 95)">
+        <line x1="-15" y1="0" x2="-15" y2="-18" stroke="#9aa5b8" stroke-width="2"/>
+        <circle cx="-15" cy="-20" r="2" fill="#ffaa00"/>
+        <rect x="-22" y="0" width="44" height="72" rx="5" fill="#141a26" stroke="#ffaa00" stroke-width="1.8"/>
+        <rect x="-16" y="6" width="32" height="18" fill="#0a0e16" stroke="#445"/>
+        <text x="0" y="14" fill="#23d18b" font-size="5.5" text-anchor="middle" font-family="monospace">SkyBridge-AK</text>
+        <text x="0" y="21" fill="#ffd24c" font-size="5" text-anchor="middle" font-family="monospace">N1234A - 230</text>
+        <circle cx="-9" cy="34" r="2.5" fill="#445"/>
+        <circle cx="0" cy="34" r="2.5" fill="#23d18b"/>
+        <circle cx="9" cy="34" r="2.5" fill="#445"/>
+        <rect x="-12" y="44" width="24" height="1.5" fill="#445"/>
+        <rect x="-12" y="48" width="24" height="1.5" fill="#445"/>
+        <rect x="-12" y="52" width="24" height="1.5" fill="#445"/>
+        <rect x="-6" y="65" width="12" height="3" rx="1" fill="#666"/>
+        <text x="0" y="95" fill="#d8e1ec" font-size="11" text-anchor="middle" font-weight="700">Mesh radio</text>
+        <text x="0" y="108" fill="#566" font-size="9" text-anchor="middle" font-family="monospace">Meshtastic node</text>
+      </g>
+      <g transform="translate(355, 115)" fill="none" stroke="#0090ff">
+        <path d="M 0 16 Q 12 0 0 -16" stroke-width="1.8" opacity="0.9">
+          <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.5s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 0 24 Q 18 0 0 -24" stroke-width="1.2" opacity="0.6">
+          <animate attributeName="opacity" values="0.2;0.6;0.2" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+        </path>
+        <text x="28" y="-18" fill="#0090ff" font-size="9" font-family="monospace" font-weight="700">BLE</text>
+      </g>
+      <g transform="translate(440, 95)">
+        <rect x="-18" y="0" width="36" height="72" rx="6" fill="#141a26" stroke="#0090ff" stroke-width="1.8"/>
+        <rect x="-14" y="8" width="28" height="50" fill="#0a0e16"/>
+        <rect x="-14" y="8" width="28" height="5" fill="#1f2738"/>
+        <rect x="-11" y="16" width="9" height="9" fill="#23d18b" opacity="0.7" rx="1"/>
+        <rect x="2"   y="16" width="9" height="9" fill="#0090ff" opacity="0.7" rx="1"/>
+        <rect x="-11" y="28" width="9" height="9" fill="#ffaa00" opacity="0.7" rx="1"/>
+        <rect x="2"   y="28" width="9" height="9" fill="#cc44ff" opacity="0.7" rx="1"/>
+        <rect x="-11" y="42" width="22" height="2" fill="#9aa5b8" opacity="0.5"/>
+        <rect x="-11" y="46" width="16" height="2" fill="#9aa5b8" opacity="0.3"/>
+        <rect x="-6" y="62" width="12" height="2" rx="1" fill="#445"/>
+        <text x="0" y="95" fill="#d8e1ec" font-size="11" text-anchor="middle" font-weight="700">Pilot phone</text>
+        <text x="0" y="108" fill="#566" font-size="9" text-anchor="middle" font-family="monospace">App + bridge</text>
+      </g>
+      <g stroke="#0090ff" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.55" fill="none">
+        <line x1="465" y1="100" x2="620" y2="50">
+          <animate attributeName="stroke-dashoffset" from="0" to="-8" dur="1s" repeatCount="indefinite"/>
+        </line>
+        <line x1="465" y1="160" x2="620" y2="200">
+          <animate attributeName="stroke-dashoffset" from="0" to="-8" dur="1s" repeatCount="indefinite"/>
+        </line>
+      </g>
+      <g transform="translate(770, 35)">
+        <rect x="-150" y="0" width="300" height="180" rx="6" fill="#141a26" stroke="#23d18b" stroke-width="2"/>
+        <rect x="-144" y="6" width="288" height="160" fill="#0a0e16"/>
+        <rect x="-144" y="6" width="288" height="16" fill="#1f2738"/>
+        <text x="-136" y="17" fill="#23d18b" font-size="9" font-family="system-ui" font-weight="800">SKYBRIDGE</text>
+        <text x="-72" y="17" fill="#9aa5b8" font-size="7" font-family="system-ui">Weather</text>
+        <text x="-36" y="17" fill="#9aa5b8" font-size="7" font-family="system-ui">Traffic</text>
+        <text x="0" y="17" fill="#9aa5b8" font-size="7" font-family="system-ui">Validate</text>
+        <text x="40" y="17" fill="#9aa5b8" font-size="7" font-family="system-ui">Channels</text>
+        <text x="125" y="17" fill="#ffaa00" font-size="7" font-family="system-ui" font-weight="700">BETA</text>
+        <rect x="-144" y="22" width="220" height="120" fill="#0d1a14"/>
+        <path d="M -144 100 Q -100 80 -60 95 T 20 90 T 76 100 L 76 142 L -144 142 Z" fill="#1a3d2e" opacity="0.7"/>
+        <circle cx="-110" cy="60" r="2.5" fill="#23d18b"/>
+        <circle cx="-80"  cy="75" r="2.5" fill="#0090ff"/>
+        <circle cx="-55"  cy="55" r="2.5" fill="#23d18b"/>
+        <circle cx="-30"  cy="85" r="2.5" fill="#ffd24c"/>
+        <circle cx="-5"   cy="65" r="2.5" fill="#23d18b"/>
+        <circle cx="20"   cy="50" r="2.5" fill="#ff5040"/>
+        <circle cx="45"   cy="75" r="2.5" fill="#23d18b"/>
+        <circle cx="65"   cy="60" r="2.5" fill="#0090ff"/>
+        <g transform="translate(-25, 110) rotate(45)">
+          <path d="M 0 -5 L 1 -1 L 6 1 L 6 2 L 1 1.5 L 1 4 L 2.5 5.5 L 2.5 6 L -2.5 6 L -2.5 5.5 L -1 4 L -1 1.5 L -6 2 L -6 1 L -1 -1 Z" fill="#ffd24c"/>
+        </g>
+        <rect x="78" y="22" width="66" height="120" fill="#1f2738"/>
+        <text x="111" y="32" fill="#ff5040" font-size="6" text-anchor="middle" font-weight="800">FAA COMMS</text>
+        <rect x="82" y="36" width="58" height="5" fill="#ff5040" opacity="0.4"/>
+        <rect x="82" y="44" width="58" height="5" fill="#ffaa00" opacity="0.4"/>
+        <rect x="82" y="52" width="58" height="5" fill="#ffaa00" opacity="0.4"/>
+        <rect x="82" y="60" width="58" height="5" fill="#9aa5b8" opacity="0.4"/>
+        <rect x="82" y="68" width="58" height="5" fill="#9aa5b8" opacity="0.4"/>
+        <rect x="82" y="76" width="58" height="5" fill="#23d18b" opacity="0.4"/>
+        <rect x="82" y="84" width="58" height="5" fill="#23d18b" opacity="0.4"/>
+        <text x="111" y="100" fill="#ffaa00" font-size="6" text-anchor="middle" font-weight="800">WEATHER</text>
+        <rect x="82" y="104" width="58" height="5" fill="#0090ff" opacity="0.4"/>
+        <rect x="82" y="112" width="58" height="5" fill="#0090ff" opacity="0.4"/>
+        <rect x="82" y="120" width="58" height="5" fill="#23d18b" opacity="0.4"/>
+        <rect x="82" y="128" width="58" height="5" fill="#23d18b" opacity="0.4"/>
+        <rect x="-144" y="146" width="288" height="20" fill="#1f2738"/>
+        <text x="-138" y="159" fill="#9aa5b8" font-size="7" font-family="monospace">PANC  PALH  PAFA  PAGS  PAHO  PAEN  PASN  PADQ</text>
+        <path d="M -30 180 L 30 180 L 40 200 L -40 200 Z" fill="#2a3140"/>
+        <line x1="-55" y1="200" x2="55" y2="200" stroke="#2a3140" stroke-width="4" stroke-linecap="round"/>
+        <text x="0" y="225" fill="#23d18b" font-size="13" text-anchor="middle" font-weight="700">Kneeboard</text>
+        <text x="0" y="240" fill="#566" font-size="10" text-anchor="middle">SkyBridge dashboard at the hub</text>
+      </g>
+    </svg>'''
+
+    return _publicize(f'''<!doctype html><html><head><meta charset="utf-8"><title>Hardware Guide - SkyBridge Alaska</title>
+    <style>
+    body {{ background:#0a0e16; color:#d8e1ec; font-family:system-ui,sans-serif; padding:24px; margin:0; }}
+    h1 {{ color:#23d18b; font-size:18px; letter-spacing:2px; text-transform:uppercase; margin:0 0 8px; }}
+    p.lede {{ color:#9aa5b8; font-size:13px; max-width:980px; line-height:1.5; }}
+    h2 {{ color:#0090ff; font-size:13px; text-transform:uppercase; letter-spacing:1.5px; margin:28px 0 8px; }}
+    h2 small {{ color:#7a8497; font-weight:400; text-transform:none; letter-spacing:0; margin-left:8px; font-size:11px; }}
+    .panel {{ background:#141a26; border-radius:8px; padding:16px 20px; margin-top:14px; }}
+    .grid2 {{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; }}
+    @media (max-width:900px) {{ .grid2 {{ grid-template-columns: 1fr; }} }}
+    .quickstart {{ border-left: 3px solid #23d18b; }}
+    .quickstart h3 {{ color:#23d18b; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin:0 0 12px; }}
+    table.cfg {{ width:100%; border-collapse:collapse; font-size:12px; }}
+    table.cfg td {{ padding:6px 0; border-bottom:1px dashed #2a3140; vertical-align:top; }}
+    table.cfg td.ckey {{ color:#9aa5b8; width:140px; font-weight:600; }}
+    table.cfg td.cval {{ color:#d8e1ec; }}
+    .chan-tbl {{ width:100%; border-collapse:collapse; background:#141a26; border-radius:8px; overflow:hidden; font-size:12px; margin-top:14px; }}
+    .chan-tbl th {{ background:#1f2738; color:#9aa5b8; text-transform:uppercase; letter-spacing:1px; font-size:10px; padding:10px 12px; text-align:left; }}
+    .chan-tbl td {{ padding:12px; border-bottom:1px solid #2a3140; vertical-align:top; }}
+    .chan-tbl td.slot {{ width:40px; text-align:center; }}
+    .slot-num {{ display:inline-block; width:24px; height:24px; line-height:24px; border-radius:50%; color:#0a0e16; font-weight:800; font-size:12px; }}
+    .chan-tbl td.cname {{ font-weight:700; letter-spacing:0.5px; white-space:nowrap; width:130px; }}
+    .chan-tbl td.crole {{ color:#9aa5b8; font-size:11px; width:160px; }}
+    .chan-tbl td.ccarries {{ color:#d8e1ec; }}
+    .chan-tbl td.cdir {{ color:#7a8497; font-size:11px; white-space:nowrap; width:140px; font-style:italic; }}
+    .chan-tbl td.ckb {{ color:#c8e88c; font-size:11px; }}
+    .chan-tbl td.cpri {{ width:50px; text-align:center; }}
+    .pri-pill {{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:800; letter-spacing:1px; color:#0a0e16; }}
+    .pri-p0 {{ background:#ff5040; }}
+    .pri-p1 {{ background:#ffaa00; }}
+    .pri-p2 {{ background:#0090ff; color:#fff; }}
+    .pri-p3 {{ background:#23d18b; }}
+    .pri-p4 {{ background:#9aa5b8; }}
+    .prirow {{ display:flex; gap:14px; align-items:flex-start; margin-bottom:10px; font-size:12px; line-height:1.4; }}
+    .prirow .pri-desc {{ color:#d8e1ec; flex:1; }}
+    .hwgrid {{ display:grid; gap:14px; margin-top:14px; }}
+    .hwgrid-4 {{ grid-template-columns: repeat(4, 1fr); }}
+    @media (max-width:1200px) {{ .hwgrid-4 {{ grid-template-columns: repeat(2, 1fr); }} }}
+    @media (max-width:680px)  {{ .hwgrid-4 {{ grid-template-columns: 1fr; }} }}
+    .hwcard {{ background:#141a26; border-radius:8px; padding:14px 16px 16px; text-align:center; display:flex; flex-direction:column; }}
+    .hwphoto {{ background:#fff; border-radius:6px; padding:10px; margin-bottom:10px; }}
+    .hwphoto img {{ max-width:100%; max-height:180px; object-fit:contain; display:block; margin:0 auto; }}
+    .hwname {{ font-size:13px; font-weight:700; letter-spacing:0.5px; margin-bottom:4px; }}
+    .hwtag {{ color:#9aa5b8; font-size:10px; letter-spacing:1px; text-transform:uppercase; font-weight:600; margin-bottom:6px; }}
+    .hwprice {{ font-size:22px; font-weight:800; letter-spacing:1px; margin:4px 0 8px; }}
+    .hwspec {{ color:#7a8497; font-size:10px; font-family:monospace; margin-bottom:10px; line-height:1.5; }}
+    .hwnote {{ color:#d8e1ec; font-size:12px; line-height:1.5; text-align:left; padding:10px 0; border-top:1px dashed #2a3140; flex:1; }}
+    .hwcredit {{ color:#566; font-size:9px; font-style:italic; margin-top:6px; }}
+    .flow-graphic {{ background:#141a26; border-radius:8px; padding:18px; margin:18px 0; }}
+    .flow-graphic svg {{ width:100%; height:auto; display:block; max-width:1100px; margin:0 auto; }}
+    .matrix-wrap {{ overflow-x:auto; margin-top:14px; }}
+    table.matrix {{ width:100%; border-collapse:collapse; background:#141a26; border-radius:8px; overflow:hidden; min-width:780px; }}
+    table.matrix thead th {{ background:#1f2738; color:#9aa5b8; text-transform:uppercase; letter-spacing:1px; font-size:10px; padding:12px 10px; text-align:center; border-bottom:2px solid #2a3140; }}
+    table.matrix thead th.fname-h {{ text-align:left; width:170px; }}
+    table.matrix thead th.dev-h {{ width:120px; font-weight:800; font-size:11px; letter-spacing:0.5px; }}
+    table.matrix thead th.sb-h {{ text-align:left; color:#0090ff; }}
+    table.matrix tbody tr:nth-child(even) {{ background:rgba(0,0,0,0.15); }}
+    table.matrix tbody td, table.matrix tbody th {{ padding:9px 10px; font-size:11px; border-bottom:1px solid #1f2738; vertical-align:middle; }}
+    table.matrix th.fname {{ text-align:left; color:#d8e1ec; font-weight:600; font-size:11px; }}
+    table.matrix td.c-y {{ text-align:center; color:#d8e1ec; }}
+    table.matrix td.c-n {{ text-align:center; }}
+    table.matrix td.c-v {{ text-align:center; color:#d8e1ec; font-family:monospace; font-size:10px; }}
+    table.matrix .yes {{ color:#23d18b; font-weight:800; font-size:16px; }}
+    table.matrix .no  {{ color:#445; font-size:16px; }}
+    table.matrix .dim {{ color:#566; font-size:10px; font-style:italic; }}
+    table.matrix .lead {{ color:#ffd24c; font-size:11px; }}
+    table.matrix td.sb {{ color:#9aa5b8; font-size:11px; line-height:1.4; max-width:280px; }}
+    .flow {{ display:flex; align-items:stretch; gap:0; margin-top:14px; flex-wrap:wrap; }}
+    .flow .step {{ flex:1; min-width:200px; background:#141a26; padding:16px 18px; border-radius:8px; margin-right:10px; position:relative; }}
+    .flow .step:last-child {{ margin-right:0; }}
+    .flow .step .num {{ color:#0090ff; font-size:10px; letter-spacing:1.5px; font-weight:800; }}
+    .flow .step .ttl {{ color:#23d18b; font-size:13px; font-weight:700; margin:4px 0 8px; letter-spacing:0.5px; }}
+    .flow .step .desc {{ color:#9aa5b8; font-size:11px; line-height:1.5; }}
+    .flow .arrow {{ display:flex; align-items:center; color:#0090ff; font-size:18px; margin:0 -4px; }}
+    @media (max-width:900px) {{ .flow .arrow {{ display:none; }} .flow .step {{ margin-right:0; margin-bottom:8px; }} }}
+    code {{ background:#1f2738; padding:1px 5px; border-radius:3px; color:#23d18b; font-size:11px; }}
+    .qr-box {{ background:#0a0e16; border:1px dashed #2a3140; border-radius:6px; padding:18px; text-align:center; color:#7a8497; font-size:11px; line-height:1.6; }}
+    .qr-box .pl {{ font-size:32px; color:#445; font-weight:700; letter-spacing:2px; }}
+    .checklist {{ list-style:none; padding:0; margin:0; }}
+    .checklist li {{ padding:8px 0 8px 28px; border-bottom:1px dashed #2a3140; font-size:12px; color:#d8e1ec; position:relative; line-height:1.5; }}
+    .checklist li:last-child {{ border-bottom:none; }}
+    .checklist li::before {{ content:"[ ]"; color:#23d18b; position:absolute; left:0; top:8px; font-size:11px; font-weight:700; font-family:monospace; }}
+    .checklist li code {{ font-size:11px; }}
+    .footnote {{ color:#7a8497; font-size:11px; line-height:1.6; margin-top:14px; }}
+    .beta {{ background:#0090ff; color:#0a0e16; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:8px; vertical-align:middle; font-weight:700; letter-spacing:1px; }}
+    </style><!--SBNAVCSS--></head><body><!--SBNAV-->
+
+    <h1>Hardware Guide <span class="beta">GETTING STARTED</span></h1>
+
+    <p class="lede">The card in the box. The SkyBridge mesh is a stock <a href="https://meshtastic.org/" target="_blank" rel="noopener" style="color:#0090ff">Meshtastic</a> network - no firmware fork, no special hardware. Pick a radio below, scan the provisioning QR, and you're on. Eight named channels carry SkyBridge data into your kneeboard at the hub.</p>
+
+    <div class="flow-graphic">{flow_svg}</div>
+
+    <div class="grid2">
+      <div class="panel quickstart">
+        <h3>Quick start - radio config</h3>
+        <table class="cfg">{cfg_rows}</table>
+      </div>
+      <div class="panel quickstart">
+        <h3>One-tap join</h3>
+        <div class="qr-box">
+          <div class="pl">QR</div>
+          <div>QR provisioning code printed on the back of every shipped radio.<br>
+          Scan in the Meshtastic app - all eight channels load automatically with current PSKs.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Compatible hardware <small>finished, enclosed, works-out-of-the-box devices</small></h2>
+    <div class="hwgrid hwgrid-4">{hw_cards}</div>
+
+    <h2>Feature comparison <small>* = best in category - last column = how the SkyBridge stack uses it</small></h2>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th class="fname-h">Feature</th>
+            <th class="dev-h" style="color:#23d18b">M3</th>
+            <th class="dev-h" style="color:#ffaa00">T-Deck</th>
+            <th class="dev-h" style="color:#cc44ff">H2T</th>
+            <th class="dev-h" style="color:#88ccff">M6 Solar</th>
+            <th class="sb-h">SkyBridge uses it for</th>
+          </tr>
+        </thead>
+        <tbody>{feat_rows}</tbody>
+      </table>
+    </div>
+
+    <h2>The eight channels <small>slot - name - what it carries - how the kneeboard uses it</small></h2>
+    <table class="chan-tbl">
+      <tr>
+        <th>Slot</th><th>Name</th><th>Role</th><th>Carries</th><th>Direction</th><th>Kneeboard renders</th><th>QoS</th>
+      </tr>
+      {chan_rows}
+    </table>
+
+    <h2>How a packet flows <small>radio -&gt; mesh -&gt; hub -&gt; kneeboard</small></h2>
+    <div class="flow">
+      <div class="step">
+        <div class="num">STEP 1</div>
+        <div class="ttl">Source</div>
+        <div class="desc">An anchor station, a pilot's radio, or an FAA feed produces an observation. The local node encodes it as a compact <a href="https://github.com/SFETTAK/Skybridge-Alaska/blob/main/paper-lab/protocol/TAIGA_PROTOCOL.md" target="_blank" rel="noopener" style="color:#0090ff">TAIGA</a> frame and tags it with priority.</div>
+      </div>
+      <div class="arrow">-&gt;</div>
+      <div class="step">
+        <div class="num">STEP 2</div>
+        <div class="ttl">Mesh hop</div>
+        <div class="desc">The frame transmits on its assigned channel (e.g. WX-OBS). Peers within range repeat it. Time-to-live + dedup keep flooding bounded; encryption stays end-to-end.</div>
+      </div>
+      <div class="arrow">-&gt;</div>
+      <div class="step">
+        <div class="num">STEP 3</div>
+        <div class="ttl">Hub ingest</div>
+        <div class="desc">A regional hub bridges the mesh to MQTT and forwards to the central kneeboard. Decoder routes by channel.</div>
+      </div>
+      <div class="arrow">-&gt;</div>
+      <div class="step">
+        <div class="num">STEP 4</div>
+        <div class="ttl">Render</div>
+        <div class="desc">Kneeboard displays the result inside <code>5-10 s</code> of mesh arrival. Stale data fades; recent data glows.</div>
+      </div>
+    </div>
+
+    <h2>QoS priority classes <small>shared scheduling logic across every channel</small></h2>
+    <div class="panel">
+      {pri_rows}
+      <div class="footnote">Higher-priority traffic preempts lower-priority traffic on the airtime queue. A SIGMET (P0) on WX-ALERTS will jump ahead of a chat message (P3) on TEXT even though they share the same radio. Class assignments are listed in the QoS column of the channel table.</div>
+    </div>
+
+    <h2>Bringing a new radio online <small>checklist</small></h2>
+    <div class="panel">
+      <ol class="checklist">
+        <li>Get a 915 MHz Meshtastic-compatible device (see Compatible Hardware above). Most ship pre-flashed.</li>
+        <li>Set <strong>Region</strong> to <code>US</code> and <strong>Modem preset</strong> to <code>LongModerate</code>.</li>
+        <li>Scan the QR code on the back of your kit - this loads all eight channels with the current PSKs.</li>
+        <li>Verify channel slot 0 (<code>SkyBridge-AK</code>) is the primary; the other seven are secondary.</li>
+        <li>Power on within range of another SkyBridge node. You'll see node IDs populate within 30 seconds on channel 0.</li>
+        <li>Open the kneeboard at the hub. Your node appears on the map; weather observations arrive on WX-OBS within minutes.</li>
+        <li>For pilot use: pin the kneeboard QR to the panel and use the radio for in-flight TEXT and PIREP relay.</li>
+      </ol>
+    </div>
+
+    <h2>What this is <small>and what it isn't</small></h2>
+    <div class="panel">
+      <div class="footnote" style="margin-top:0">
+        <strong style="color:#23d18b">Is:</strong> A reference design for layering aviation weather + traffic on top of an existing
+        open mesh radio standard. Eight named channels with clear responsibilities, end-to-end encrypted, priority-aware.
+        <br><br>
+        <strong style="color:#ffaa00">Isn't:</strong> A replacement for ATC, ADS-B Out, or certified weather services. The
+        mesh is supplementary coverage for regions where FAA infrastructure thins out. The kneeboard is in development
+        and not approved for use in flight.
+      </div>
+    </div>
+
+    <!--SBFOOTER--></body></html>''', "/public/hardware-guide")
 
 
 
@@ -6665,6 +7177,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <a href="/public/wx-validate"    style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">Comp Validate</a>
     <a href="/public/wx-icons-preview" style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">HUD Icons</a>
     <a href="/public/icons-preview"  style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">ADS-B Icons</a>
+    <a href="/public/hardware-guide" style="color:#9aa5b8;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 8px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='#23d18b';this.style.background='rgba(35,209,139,0.08)';" onmouseout="this.style.color='#9aa5b8';this.style.background='transparent';">Hardware Guide</a>
   </span>
   <div class="gps-strip">
     <span id="gpsStatus">GPS: acquiring</span>
@@ -6841,7 +7354,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       <span class="size-label">Trail Length (rendered)</span>
       <span class="size-value" id="trailRenderValue">5 min</span>
     </div>
-    <input type="range" id="trailRenderSlider" min="1" max="60" step="1" value="60" oninput="applyTrailRender(this.value)" />
+    <input type="range" id="trailRenderSlider" min="1" max="10" step="1" value="10" oninput="applyTrailRender(this.value)" />
   </div>
   <div class="size-row">
     <div class="size-hdr">
@@ -6998,8 +7511,8 @@ const TRAIL_OPACITY     = 0.65; // segment opacity
 const VECTOR_DASH       = '4 4'; // dashed lookahead line
 const VECTOR_WEIGHT     = 1.5;
 
-let TRAIL_RENDER_MIN = parseFloat(localStorage.getItem('skybridge-trail-render-min') || '60');
-if (isNaN(TRAIL_RENDER_MIN) || TRAIL_RENDER_MIN < 1 || TRAIL_RENDER_MIN > 60) TRAIL_RENDER_MIN = 5;
+let TRAIL_RENDER_MIN = parseFloat(localStorage.getItem('skybridge-trail-render-min-v2') || '10');
+if (isNaN(TRAIL_RENDER_MIN) || TRAIL_RENDER_MIN < 1 || TRAIL_RENDER_MIN > 10) TRAIL_RENDER_MIN = 10;
 
 // Rewind anchor in MINUTES AGO. 0 = live (slide all the way left), 60 = 1 hour ago.
 // When non-zero, trails are rendered as they appeared at that point in time.
@@ -7675,7 +8188,7 @@ window.applyTrailRender = function(val) {
   if (isNaN(v) || v < 1 || v > 60) return;
   TRAIL_RENDER_MIN = v;
   document.getElementById('trailRenderValue').textContent = v + ' min';
-  try { localStorage.setItem('skybridge-trail-render-min', String(v)); } catch(e) {}
+  try { localStorage.setItem('skybridge-trail-render-min-v2', String(v)); } catch(e) {}
   // Re-fetch + redraw immediately with the new window
   loadTrails();
 };
